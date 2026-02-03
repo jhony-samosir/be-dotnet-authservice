@@ -1,6 +1,6 @@
 ﻿namespace AuthService.DTOs
 {
-    public class DTOs
+    public class AuthDTO
     {
     }
 }

@@ -54,3 +54,5 @@ TestResult.xml
 nunit-*.xml
 /.vs/AuthService/FileContentIndex
 /.vs/AuthService/v17/.suo
+/.vs/*
+/.vs*

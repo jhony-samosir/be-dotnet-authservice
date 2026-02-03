@@ -1,7 +1,52 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\common\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\common\\apiresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\contracts\\response\\authresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\contracts\\response\\authresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\contracts\\request\\authrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\contracts\\request\\authrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\dtos\\authdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\dtos\\authdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\data\\scaffold.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\data\\scaffold.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\helpers\\helpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\helpers\\helpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\middlewares\\middleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\middlewares\\middleware.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|c:\\users\\1158\\documents\\projecttesting\\authservice\\be-dotnet-authservice\\authservice\\extensions\\servicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7DD7243-6864-47ED-85AE-A9BF34E6F309}|AuthService\\AuthService.csproj|solutionrelative:authservice\\extensions\\servicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +54,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 12,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,6 +75,149 @@
             {
               "$type": "Bookmark",
               "Name": "ST:131:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AuthRequest.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Contracts\\Request\\AuthRequest.cs",
+              "RelativeDocumentMoniker": "AuthService\\Contracts\\Request\\AuthRequest.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Contracts\\Request\\AuthRequest.cs",
+              "RelativeToolTip": "AuthService\\Contracts\\Request\\AuthRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-03T02:21:35.387Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AuthDTO.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\DTOs\\AuthDTO.cs",
+              "RelativeDocumentMoniker": "AuthService\\DTOs\\AuthDTO.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\DTOs\\AuthDTO.cs",
+              "RelativeToolTip": "AuthService\\DTOs\\AuthDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-03T02:21:17.151Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuthResponse.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Contracts\\Response\\AuthResponse.cs",
+              "RelativeDocumentMoniker": "AuthService\\Contracts\\Response\\AuthResponse.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Contracts\\Response\\AuthResponse.cs",
+              "RelativeToolTip": "AuthService\\Contracts\\Response\\AuthResponse.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-03T02:18:29.593Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ApiResponse.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Common\\ApiResponse.cs",
+              "RelativeDocumentMoniker": "AuthService\\Common\\ApiResponse.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Common\\ApiResponse.cs",
+              "RelativeToolTip": "AuthService\\Common\\ApiResponse.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-03T02:14:36.084Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "AuthService\\Services\\AuthService.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Services\\AuthService.cs",
+              "RelativeToolTip": "AuthService\\Services\\AuthService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAsAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T10:04:18.096Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "AuthService\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "AuthService\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAcAAAAAAAAAAAAAwBkAAAA/AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T09:56:00.668Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Scaffold.txt",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Data\\Scaffold.txt",
+              "RelativeDocumentMoniker": "AuthService\\Data\\Scaffold.txt",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Data\\Scaffold.txt",
+              "RelativeToolTip": "AuthService\\Data\\Scaffold.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2026-02-02T09:54:45.045Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Program.cs",
+              "RelativeDocumentMoniker": "AuthService\\Program.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Program.cs",
+              "RelativeToolTip": "AuthService\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T07:40:42.228Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Helpers.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Helpers\\Helpers.cs",
+              "RelativeDocumentMoniker": "AuthService\\Helpers\\Helpers.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Helpers\\Helpers.cs",
+              "RelativeToolTip": "AuthService\\Helpers\\Helpers.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T07:29:42.089Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Middleware.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Middlewares\\Middleware.cs",
+              "RelativeDocumentMoniker": "AuthService\\Middlewares\\Middleware.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Middlewares\\Middleware.cs",
+              "RelativeToolTip": "AuthService\\Middlewares\\Middleware.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T07:29:08.043Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ServiceCollectionExtensions.cs",
+              "DocumentMoniker": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Extensions\\ServiceCollectionExtensions.cs",
+              "RelativeDocumentMoniker": "AuthService\\Extensions\\ServiceCollectionExtensions.cs",
+              "ToolTip": "C:\\Users\\1158\\Documents\\ProjectTesting\\authservice\\be-dotnet-authservice\\AuthService\\Extensions\\ServiceCollectionExtensions.cs",
+              "RelativeToolTip": "AuthService\\Extensions\\ServiceCollectionExtensions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T07:28:48.388Z",
+              "EditorCaption": ""
             }
           ]
         },
