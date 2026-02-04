@@ -55,3 +55,4 @@ nunit-*.xml
 /.vs/AuthService/FileContentIndex
 /.vs/AuthService/v17/.suo
 /.vs/
+/AuthService/Data/Scaffold.txt
