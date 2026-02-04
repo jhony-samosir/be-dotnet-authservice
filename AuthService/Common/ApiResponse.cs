@@ -1,5 +1,4 @@
-﻿
-namespace AuthService.Common
+﻿namespace AuthService.Common
 {
     public record ApiResponse<T>(
         bool Success,
