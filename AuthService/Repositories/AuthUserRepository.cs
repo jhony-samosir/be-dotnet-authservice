@@ -54,6 +54,76 @@ namespace AuthService.Repositories
 
             return (userEntity, roleNames);
         }
+
+        public async Task<bool> ExistsByEmailAsync(string emailOrUsername, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.AuthUser
+                .AnyAsync(u => u.Username == emailOrUsername && !u.IsDeleted, cancellationToken);
+        }
+
+        public async Task<(AuthUser User, List<string> Roles)> CreateAsync(
+            string emailOrUsername,
+            string passwordHash,
+            IEnumerable<string>? roleNames,
+            string? createdBy,
+            CancellationToken cancellationToken = default)
+        {
+            var now = DateTime.UtcNow;
+
+            var user = new AuthUser
+            {
+                Username = emailOrUsername,
+                PasswordHash = passwordHash,
+                IsActive = true,
+                IsLocked = false,
+                IsDeleted = false,
+                CreatedDate = now,
+                CreatedBy = createdBy
+            };
+
+            _dbContext.AuthUser.Add(user);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            var rolesList = new List<string>();
+
+            if (roleNames != null)
+            {
+                var normalizedRoleNames = roleNames
+                    .Where(r => !string.IsNullOrWhiteSpace(r))
+                    .Select(r => r.Trim())
+                    .Distinct()
+                    .ToList();
+
+                if (normalizedRoleNames.Count > 0)
+                {
+                    var roles = await _dbContext.AuthRole
+                        .Where(r => normalizedRoleNames.Contains(r.Name) && !r.IsDeleted)
+                        .ToListAsync(cancellationToken);
+
+                    foreach (var role in roles)
+                    {
+                        var userRole = new AuthUserRole
+                        {
+                            AuthUserId = user.AuthUserId,
+                            AuthRoleId = role.AuthRoleId,
+                            AssignedDate = now,
+                            AssignedBy = createdBy,
+                            IsDeleted = false
+                        };
+
+                        _dbContext.AuthUserRole.Add(userRole);
+                        rolesList.Add(role.Name);
+                    }
+
+                    if (roles.Count > 0)
+                    {
+                        await _dbContext.SaveChangesAsync(cancellationToken);
+                    }
+                }
+            }
+
+            return (user, rolesList);
+        }
     }
 }
 

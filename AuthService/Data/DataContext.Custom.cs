@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace AuthService.Data;
@@ -10,9 +10,14 @@ public partial class DataContext
         // === SOFT DELETE GLOBAL FILTER ===
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
-            if (entity.IsKeyless) continue;
+            if (entity.IsKeyless)
+                continue;
 
-            entity.AddProperty("IsDeleted", typeof(bool));
+            // Only apply the filter to entities that actually have an IsDeleted property.
+            // Previously we always added a shadow property, which conflicts now that
+            // the entities define a real IsDeleted column.
+            if (entity.FindProperty("IsDeleted") == null)
+                continue;
 
             var parameter = Expression.Parameter(entity.ClrType, "e");
             var body = Expression.Equal(

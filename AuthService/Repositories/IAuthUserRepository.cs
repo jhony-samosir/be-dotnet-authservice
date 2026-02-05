@@ -18,6 +18,23 @@ namespace AuthService.Repositories
         Task<(AuthUser? User, List<string> Roles)> GetByEmailWithRolesAsync(
             string emailOrUsername,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Returns true if an active (non-deleted) user already exists with the given email/username.
+        /// Used to enforce uniqueness during registration.
+        /// </summary>
+        Task<bool> ExistsByEmailAsync(string emailOrUsername, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Creates a new user with the specified email and password hash and optionally assigns roles.
+        /// Returns the created user together with the roles actually assigned.
+        /// </summary>
+        Task<(AuthUser User, List<string> Roles)> CreateAsync(
+            string emailOrUsername,
+            string passwordHash,
+            IEnumerable<string>? roleNames,
+            string? createdBy,
+            CancellationToken cancellationToken = default);
     }
 }
 

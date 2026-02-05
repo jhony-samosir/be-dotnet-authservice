@@ -43,6 +43,32 @@ namespace AuthService.Controllers
                 Data: result.Value
             ));
         }
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        [ProducesResponseType(typeof(ApiResponse<AuthResponse>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            var result = await _authService.Register(request);
+
+            if (!result.IsSuccess || result.Value is null)
+            {
+                // Email already in use or other business rule violation
+                return Conflict(new ApiResponse<AuthResponse>(
+                    Success: false,
+                    Message: result.Error ?? "Registration failed.",
+                    Data: null
+                ));
+            }
+
+            return StatusCode(StatusCodes.Status201Created, new ApiResponse<AuthResponse>(
+                Success: true,
+                Message: "Registration success",
+                Data: result.Value
+            ));
+        }
     }
 
 }
