@@ -11,6 +11,9 @@ public static class PipelineMiddlewareExtensions
     /// </summary>
     public static WebApplication UseAuthPipeline(this WebApplication app)
     {
+        // Security headers first so they apply to all responses including errors
+        app.UseSecurityHeaders();
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -22,6 +25,15 @@ public static class PipelineMiddlewareExtensions
         app.UseAuthorization();
         app.MapControllers();
 
+        return app;
+    }
+
+    /// <summary>
+    /// Adds enterprise security headers middleware (CORS-related, cache-control, HSTS, X-Frame-Options, etc.).
+    /// </summary>
+    public static WebApplication UseSecurityHeaders(this WebApplication app)
+    {
+        app.UseMiddleware<SecurityHeadersMiddleware>();
         return app;
     }
 }

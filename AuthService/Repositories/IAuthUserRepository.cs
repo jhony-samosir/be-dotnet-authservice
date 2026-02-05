@@ -35,6 +35,40 @@ namespace AuthService.Repositories
             IEnumerable<string>? roleNames,
             string? createdBy,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets a paged list of non-deleted users with their role names.
+        /// </summary>
+        Task<(List<(AuthUser User, List<string> Roles)> Items, int TotalCount)> GetPagedAsync(
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets a user by id with roles. Uses IgnoreQueryFilters to include soft-deleted for update/delete flows.
+        /// </summary>
+        Task<(AuthUser? User, List<string> Roles)> GetByIdWithRolesAsync(
+            int userId,
+            bool includeDeleted = false,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Updates user fields (username/email, isActive, isLocked) and optionally replaces roles.
+        /// Returns (null, empty) if user not found.
+        /// </summary>
+        Task<(AuthUser? User, List<string> Roles)> UpdateAsync(
+            int userId,
+            string? email,
+            bool? isActive,
+            bool? isLocked,
+            IReadOnlyList<string>? roleNames,
+            string? updatedBy,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Soft-deletes the user. Interceptor sets IsDeleted, DeletedDate, DeletedBy.
+        /// </summary>
+        Task<bool> SoftDeleteAsync(int userId, CancellationToken cancellationToken = default);
     }
 }
 

@@ -8,11 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AuthService.Services
 {
-    public interface ITokenService
-    {
-        (string Token, int ExpiresInSeconds) GenerateAccessToken(AuthUser user, IEnumerable<string> roles);
-    }
-
     /// <summary>
     /// Responsible for generating JWT access tokens.
     /// Depends only on configuration and BCL types, which keeps it

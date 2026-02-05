@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace AuthService.Extensions;
 
@@ -30,14 +31,55 @@ public static class ServiceCollectionExtensions
         services.AddValidatorsFromAssemblyContaining<AuthRequestValidator>();
 
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(options =>
+        {
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Description = "Enter: Bearer {your JWT}",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            };
+
+            options.AddSecurityDefinition("Bearer", securityScheme);
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
+
 
         AddDbContext(services, configuration);
         AddJwtConfiguration(services, configuration);
+        AddSecurityHeaders(services, configuration);
         AddApplicationServices(services);
         AddJwtAuthentication(services, configuration);
 
         return services;
+    }
+
+    private static void AddSecurityHeaders(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<SecurityHeadersOptions>(
+            configuration.GetSection(SecurityHeadersOptions.SectionName));
     }
 
     private static void AddDbContext(IServiceCollection services, IConfiguration configuration)
@@ -61,6 +103,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IAuthUserRepository, AuthUserRepository>();
         services.AddScoped<IAuthService, AuthService.Services.AuthService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
     }
@@ -100,9 +143,9 @@ public static class ServiceCollectionExtensions
                 };
             });
 
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-        });
+        //services.AddAuthorization(options =>
+        //{
+        //    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+        //});
     }
 }

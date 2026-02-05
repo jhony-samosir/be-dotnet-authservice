@@ -124,6 +124,135 @@ namespace AuthService.Repositories
 
             return (user, rolesList);
         }
+
+        public async Task<(List<(AuthUser User, List<string> Roles)> Items, int TotalCount)> GetPagedAsync(
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken = default)
+        {
+            var totalCount = await _dbContext.AuthUser.CountAsync(cancellationToken);
+
+            var userIds = await _dbContext.AuthUser
+                .OrderBy(u => u.AuthUserId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => u.AuthUserId)
+                .ToListAsync(cancellationToken);
+
+            if (userIds.Count == 0)
+                return (new List<(AuthUser User, List<string> Roles)>(), totalCount);
+
+            var users = await _dbContext.AuthUser
+                .Where(u => userIds.Contains(u.AuthUserId))
+                .OrderBy(u => u.AuthUserId)
+                .ToListAsync(cancellationToken);
+
+            var roleMap = await (from ur in _dbContext.AuthUserRole
+                    join r in _dbContext.AuthRole on ur.AuthRoleId equals r.AuthRoleId
+                    where userIds.Contains(ur.AuthUserId) && !ur.IsDeleted && !r.IsDeleted
+                    select new { ur.AuthUserId, r.Name })
+                .ToListAsync(cancellationToken);
+
+            var rolesByUser = roleMap
+                .GroupBy(x => x.AuthUserId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.Name).ToList());
+
+            var items = users.Select(u => (User: u, Roles: rolesByUser.GetValueOrDefault(u.AuthUserId, new List<string>()))).ToList();
+            return (items, totalCount);
+        }
+
+        public async Task<(AuthUser? User, List<string> Roles)> GetByIdWithRolesAsync(
+            int userId,
+            bool includeDeleted = false,
+            CancellationToken cancellationToken = default)
+        {
+            var query = _dbContext.AuthUser.AsQueryable();
+            if (includeDeleted)
+                query = query.IgnoreQueryFilters();
+
+            var user = await query.FirstOrDefaultAsync(u => u.AuthUserId == userId, cancellationToken);
+            if (user == null)
+                return (null, new List<string>());
+
+            var roleRows = await (from ur in _dbContext.AuthUserRole
+                    join r in _dbContext.AuthRole on ur.AuthRoleId equals r.AuthRoleId
+                    where ur.AuthUserId == userId && !ur.IsDeleted && !r.IsDeleted
+                    select r.Name)
+                .ToListAsync(cancellationToken);
+
+            return (user, roleRows);
+        }
+
+        public async Task<(AuthUser? User, List<string> Roles)> UpdateAsync(
+            int userId,
+            string? email,
+            bool? isActive,
+            bool? isLocked,
+            IReadOnlyList<string>? roleNames,
+            string? updatedBy,
+            CancellationToken cancellationToken = default)
+        {
+            var (user, _) = await GetByIdWithRolesAsync(userId, includeDeleted: false, cancellationToken);
+            if (user == null)
+                return (null, new List<string>());
+
+            if (email != null)
+                user.Username = email;
+            if (isActive.HasValue)
+                user.IsActive = isActive.Value;
+            if (isLocked.HasValue)
+                user.IsLocked = isLocked.Value;
+
+            if (roleNames != null)
+            {
+                var existing = await _dbContext.AuthUserRole
+                    .Where(ur => ur.AuthUserId == userId && !ur.IsDeleted)
+                    .ToListAsync(cancellationToken);
+                foreach (var ur in existing)
+                    ur.IsDeleted = true;
+                var now = DateTime.UtcNow;
+                var normalized = roleNames.Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => r.Trim()).Distinct().ToList();
+                if (normalized.Count > 0)
+                {
+                    var roles = await _dbContext.AuthRole
+                        .Where(r => normalized.Contains(r.Name) && !r.IsDeleted)
+                        .ToListAsync(cancellationToken);
+                    foreach (var role in roles)
+                    {
+                        _dbContext.AuthUserRole.Add(new AuthUserRole
+                        {
+                            AuthUserId = userId,
+                            AuthRoleId = role.AuthRoleId,
+                            AssignedDate = now,
+                            AssignedBy = updatedBy,
+                            IsDeleted = false
+                        });
+                    }
+                }
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            var rolesList = await (from ur in _dbContext.AuthUserRole
+                    join r in _dbContext.AuthRole on ur.AuthRoleId equals r.AuthRoleId
+                    where ur.AuthUserId == userId && !ur.IsDeleted && !r.IsDeleted
+                    select r.Name)
+                .ToListAsync(cancellationToken);
+
+            return (user, rolesList);
+        }
+
+        public async Task<bool> SoftDeleteAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _dbContext.AuthUser
+                .FirstOrDefaultAsync(u => u.AuthUserId == userId && !u.IsDeleted, cancellationToken);
+            if (user == null)
+                return false;
+
+            _dbContext.AuthUser.Remove(user);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return true;
+        }
     }
 }
 
