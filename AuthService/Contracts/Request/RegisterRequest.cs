@@ -14,11 +14,6 @@ namespace AuthService.Contracts.Request
         public string Password { get; set; } = string.Empty;
 
         public string ConfirmPassword { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Optional list of role names to assign to the user.
-        /// These must already exist in the AuthRole table.
-        /// </summary>
         public List<string>? Roles { get; set; }
     }
 }

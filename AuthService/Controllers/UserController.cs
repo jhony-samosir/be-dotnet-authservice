@@ -12,7 +12,7 @@ namespace AuthService.Controllers;
 /// User management: list (paged), update, soft delete.
 /// </summary>
 [ApiController]
-[Route("api/users")]
+[Route("api/[controller]")]
 [Authorize]
 public class UserController : ControllerBase
 {
@@ -23,9 +23,6 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    /// <summary>
-    /// Get a paged list of users (non-deleted).
-    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse<PagedResult<UserListItemDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetList(
@@ -41,9 +38,6 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<PagedResult<UserListItemDto>>(true, "OK", result.Value));
     }
 
-    /// <summary>
-    /// Update a user by id (email, is_active, is_locked, roles).
-    /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<UserListItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,9 +61,6 @@ public class UserController : ControllerBase
         return Ok(new ApiResponse<UserListItemDto>(result.IsSuccess, "Updated", result.Value));
     }
 
-    /// <summary>
-    /// Soft-delete a user by id.
-    /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

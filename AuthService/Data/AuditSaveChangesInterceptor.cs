@@ -1,21 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AuthService.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.Security.Claims;
 
 public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ICurrentUser _currentUser;
 
-    public AuditSaveChangesInterceptor(IHttpContextAccessor httpContextAccessor)
+    public AuditSaveChangesInterceptor(ICurrentUser currentUser)
     {
-        _httpContextAccessor = httpContextAccessor;
+        _currentUser = currentUser;
     }
 
     private string CurrentUser =>
-        _httpContextAccessor.HttpContext?.User?
-            .FindFirst(ClaimTypes.NameIdentifier)?.Value
-        ?? "system";
+        _currentUser.UserId != 0
+            ? _currentUser.UserId.ToString()
+            : _currentUser.UserName
+              ?? _currentUser.LoginName
+              ?? "system";
 
     private static bool Has(EntityEntry e, string name)
         => e.Metadata.FindProperty(name) != null;
@@ -33,7 +35,9 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 
         foreach (var entry in context.ChangeTracker.Entries())
         {
+            // =========================
             // INSERT
+            // =========================
             if (entry.State == EntityState.Added)
             {
                 Set(entry, "CreatedDate", now);
@@ -41,12 +45,15 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
                 Set(entry, "IsDeleted", false);
             }
 
+            // =========================
             // UPDATE
+            // =========================
             if (entry.State == EntityState.Modified)
             {
                 Set(entry, "UpdatedDate", now);
                 Set(entry, "UpdatedBy", user);
 
+                // protect created fields
                 if (Has(entry, "CreatedDate"))
                     entry.Property("CreatedDate").IsModified = false;
 
@@ -54,7 +61,9 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
                     entry.Property("CreatedBy").IsModified = false;
             }
 
+            // =========================
             // SOFT DELETE
+            // =========================
             if (entry.State == EntityState.Deleted && Has(entry, "IsDeleted"))
             {
                 entry.State = EntityState.Modified;
@@ -70,7 +79,9 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
         DbContextEventData eventData,
         InterceptionResult<int> result)
     {
-        ApplyAudit(eventData.Context!);
+        if (eventData.Context != null)
+            ApplyAudit(eventData.Context);
+
         return result;
     }
 
@@ -79,7 +90,9 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
-        ApplyAudit(eventData.Context!);
+        if (eventData.Context != null)
+            ApplyAudit(eventData.Context);
+
         return ValueTask.FromResult(result);
     }
 }

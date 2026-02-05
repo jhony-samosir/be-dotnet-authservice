@@ -1,7 +1,7 @@
-using System.Text;
 using AuthService.Configuration;
 using AuthService.Data;
 using AuthService.Domain;
+using AuthService.Helpers;
 using AuthService.Repositories;
 using AuthService.Services;
 using AuthService.Validators;
@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace AuthService.Extensions;
 
@@ -19,15 +20,10 @@ namespace AuthService.Extensions;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Registers all application services: controllers, validation, DbContext,
-    /// repositories, auth service, token service, password hasher, JWT authentication.
-    /// </summary>
     public static IServiceCollection AddAuthApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers();
 
-        // FluentValidation (FluentValidation.DependencyInjectionExtensions)
         services.AddValidatorsFromAssemblyContaining<AuthRequestValidator>();
 
         services.AddEndpointsApiExplorer();
@@ -106,6 +102,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
+        services.AddScoped<ICurrentUser, CurrentUser>();
     }
 
     private static void AddJwtAuthentication(IServiceCollection services, IConfiguration configuration)
@@ -115,7 +112,6 @@ public static class ServiceCollectionExtensions
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SigningKey));
         
-        // Check if we're in Development environment
         var isDevelopment = configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == "Development" ||
                            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
@@ -127,7 +123,6 @@ public static class ServiceCollectionExtensions
             })
             .AddJwtBearer(options =>
             {
-                // Allow HTTP in development for local testing (e.g., Swagger on HTTP)
                 options.RequireHttpsMetadata = !isDevelopment;
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -143,9 +138,9 @@ public static class ServiceCollectionExtensions
                 };
             });
 
-        //services.AddAuthorization(options =>
-        //{
-        //    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-        //});
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+        });
     }
 }

@@ -21,7 +21,6 @@ namespace AuthService.Repositories
             string emailOrUsername,
             CancellationToken cancellationToken = default)
         {
-            // Treat the email as the username column in the existing schema.
             var query =
                 from user in _dbContext.AuthUser
                 where user.Username == emailOrUsername
@@ -76,9 +75,7 @@ namespace AuthService.Repositories
                 PasswordHash = passwordHash,
                 IsActive = true,
                 IsLocked = false,
-                IsDeleted = false,
-                CreatedDate = now,
-                CreatedBy = createdBy
+                IsDeleted = false
             };
 
             _dbContext.AuthUser.Add(user);

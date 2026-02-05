@@ -13,7 +13,6 @@ public sealed class SecurityHeadersMiddleware
     private readonly RequestDelegate _next;
     private readonly SecurityHeadersOptions _options;
 
-    // Well-known header names (avoid typos and support removal)
     private const string HeaderAccessControlAllowHeaders = "Access-Control-Allow-Headers";
     private const string HeaderAccessControlAllowMethods = "Access-Control-Allow-Methods";
     private const string HeaderCacheControl = "Cache-Control";
@@ -36,7 +35,6 @@ public sealed class SecurityHeadersMiddleware
     {
         var response = context.Response;
 
-        // Register to remove Server header right before sending (Kestrel adds it late)
         if (_options.RemoveServerHeader)
         {
             response.OnStarting(() =>
@@ -47,7 +45,6 @@ public sealed class SecurityHeadersMiddleware
             });
         }
 
-        // Set security headers before calling next so they are sent with every response
         if (!string.IsNullOrEmpty(_options.AccessControlAllowHeaders))
             response.Headers[HeaderAccessControlAllowHeaders] = _options.AccessControlAllowHeaders;
         if (!string.IsNullOrEmpty(_options.AccessControlAllowMethods))

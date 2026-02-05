@@ -56,27 +56,17 @@ namespace AuthService.Services
             return Result<AuthResponse>.Success(response);
         }
 
-        /// <summary>
-        /// Handles the registration use case:
-        /// - ensures the email is not already in use
-        /// - creates a new active user with a hashed password
-        /// - optionally assigns existing roles
-        /// - issues a JWT access token for the new user
-        /// </summary>
         public async Task<Result<AuthResponse>> Register(RegisterRequest req, CancellationToken cancellationToken = default)
         {
-            // Check if email is already taken
             var exists = await _userRepository.ExistsByEmailAsync(req.Email, cancellationToken);
             if (exists)
             {
                 return Result<AuthResponse>.Failure("Email is already in use.");
             }
 
-            // Hash the password using ASP.NET Core Identity hasher
             var tempUser = new AuthUser { Username = req.Email };
             var passwordHash = _passwordHasher.HashPassword(tempUser, req.Password);
 
-            // Create user and assign roles (if provided and existing)
             var (user, roles) = await _userRepository.CreateAsync(
                 emailOrUsername: req.Email,
                 passwordHash: passwordHash,

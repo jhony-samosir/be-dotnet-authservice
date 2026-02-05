@@ -32,10 +32,8 @@ namespace AuthService.Services
 
             var claims = new List<Claim>
             {
-                // Subject and NameIdentifier use the existing AuthUserId
                 new(JwtRegisteredClaimNames.Sub, user.AuthUserId.ToString()),
                 new(ClaimTypes.NameIdentifier, user.AuthUserId.ToString()),
-                // Username is assumed to be the user's email for this service
                 new(JwtRegisteredClaimNames.Email, user.Username),
                 new(ClaimTypes.Name, user.Username)
             };

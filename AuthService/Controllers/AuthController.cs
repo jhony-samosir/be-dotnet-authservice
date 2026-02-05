@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AuthService.Controllers
 {
     [ApiController]
-    [Route("api/auth")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -29,7 +29,6 @@ namespace AuthService.Controllers
 
             if (!result.IsSuccess || result.Value is null)
             {
-                // Invalid credentials or inactive user: return 401 with a consistent response body.
                 return Unauthorized(new ApiResponse<AuthResponse>(
                     Success: false,
                     Message: result.Error ?? "Invalid credentials.",
@@ -55,7 +54,6 @@ namespace AuthService.Controllers
 
             if (!result.IsSuccess || result.Value is null)
             {
-                // Email already in use or other business rule violation
                 return Conflict(new ApiResponse<AuthResponse>(
                     Success: false,
                     Message: result.Error ?? "Registration failed.",
