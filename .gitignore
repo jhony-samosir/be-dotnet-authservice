@@ -56,3 +56,4 @@ nunit-*.xml
 /.vs/AuthService/v17/.suo
 /.vs/
 /AuthService/Data/Scaffold.txt
+/AuthService/appsettings.Development.json

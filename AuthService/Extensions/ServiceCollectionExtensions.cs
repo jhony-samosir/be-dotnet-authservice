@@ -1,6 +1,108 @@
-﻿namespace AuthService.Extensions
+using System.Text;
+using AuthService.Configuration;
+using AuthService.Data;
+using AuthService.Domain;
+using AuthService.Repositories;
+using AuthService.Services;
+using AuthService.Validators;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
+namespace AuthService.Extensions;
+
+/// <summary>
+/// Centralizes dependency injection registration for the auth service.
+/// </summary>
+public static class ServiceCollectionExtensions
 {
-    public class ServiceCollectionExtensions
+    /// <summary>
+    /// Registers all application services: controllers, validation, DbContext,
+    /// repositories, auth service, token service, password hasher, JWT authentication.
+    /// </summary>
+    public static IServiceCollection AddAuthApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddControllers();
+
+        // FluentValidation (FluentValidation.DependencyInjectionExtensions)
+        services.AddValidatorsFromAssemblyContaining<AuthRequestValidator>();
+
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+
+        AddDbContext(services, configuration);
+        AddJwtConfiguration(services, configuration);
+        AddApplicationServices(services);
+        AddJwtAuthentication(services, configuration);
+
+        return services;
+    }
+
+    private static void AddDbContext(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddHttpContextAccessor();
+        services.AddScoped<AuditSaveChangesInterceptor>();
+        services.AddDbContext<DataContext>((sp, options) =>
+        {
+            var auditInterceptor = sp.GetRequiredService<AuditSaveChangesInterceptor>();
+            options.UseNpgsql(configuration.GetConnectionString("Default"))
+                   .AddInterceptors(auditInterceptor);
+        });
+    }
+
+    private static void AddJwtConfiguration(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+    }
+
+    private static void AddApplicationServices(IServiceCollection services)
+    {
+        services.AddScoped<IAuthUserRepository, AuthUserRepository>();
+        services.AddScoped<IAuthService, AuthService.Services.AuthService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IPasswordHasher<AuthUser>, PasswordHasher<AuthUser>>();
+    }
+
+    private static void AddJwtAuthentication(IServiceCollection services, IConfiguration configuration)
+    {
+        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+            ?? throw new InvalidOperationException("Jwt configuration section is missing.");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SigningKey));
+        
+        // Check if we're in Development environment
+        var isDevelopment = configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") == "Development" ||
+                           Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                // Allow HTTP in development for local testing (e.g., Swagger on HTTP)
+                options.RequireHttpsMetadata = !isDevelopment;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(1)
+                };
+            });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+        });
     }
 }
