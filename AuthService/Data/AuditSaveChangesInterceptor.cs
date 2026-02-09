@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
+namespace AuthService.Data;
+
 public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
     private readonly ICurrentUser _currentUser;
@@ -13,11 +15,13 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
     }
 
     private string CurrentUser =>
-        _currentUser.UserId != 0
-            ? _currentUser.UserId.ToString()
-            : _currentUser.UserName
-              ?? _currentUser.LoginName
-              ?? "system";
+        !string.IsNullOrWhiteSpace(_currentUser.UserName)
+            ? _currentUser.UserName
+            : !string.IsNullOrWhiteSpace(_currentUser.LoginName)
+                ? _currentUser.LoginName
+                : _currentUser.UserId != 0
+                    ? _currentUser.UserId.ToString()
+                    : "system";
 
     private static bool Has(EntityEntry e, string name)
         => e.Metadata.FindProperty(name) != null;

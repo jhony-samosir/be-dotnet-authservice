@@ -17,34 +17,71 @@ namespace AuthService.Repositories
             _dbContext = dbContext;
         }
 
-        public Task<AuthRole> CreateAsync(string name, string description, CancellationToken cancellationToken = default)
+        public async Task<AuthRole> CreateAsync(string name, string description, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var role = new AuthRole
+            {
+                Name = name,
+                Description = description,
+            };
+
+            _dbContext.AuthRole.Add(role);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return role;
         }
 
-        public async Task<bool> ExistsByRoleNameAsync(string roleName, CancellationToken cancellationToken = default)
+        public async Task<bool> RoleNameAlreadyExists(string roleName, CancellationToken cancellationToken = default)
         {
             return await _dbContext.AuthRole.AnyAsync(x => x.Name == roleName && !x.IsDeleted, cancellationToken);
         }
 
-        public Task<AuthRole> GetByIdAsync(int userId, bool includeDeleted = false, CancellationToken cancellationToken = default)
+        public async Task<AuthRole?> GetByIdAsync(int roleId, bool includeDeleted = false, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _dbContext.AuthRole.FirstOrDefaultAsync(x => x.AuthRoleId == roleId, cancellationToken);
         }
 
-        public Task<(List<AuthRole> Role, int totalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<(List<AuthRole> Role, int totalCount)> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var query = _dbContext.AuthRole.AsQueryable();
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var items = await query
+                .OrderBy(r => r.AuthRoleId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, totalCount);
         }
 
-        public Task<bool> SoftDeleteAsync(int roleId, CancellationToken cancellationToken = default)
+        public async Task<bool> SoftDeleteAsync(int roleId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var role = await _dbContext.AuthRole.FirstOrDefaultAsync(r => r.AuthRoleId == roleId, cancellationToken);
+
+            if (role == null)
+                return false;
+
+            _dbContext.Remove(role);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return true;
         }
 
-        public Task<AuthRole?> UpdateAsync(string name, string description, CancellationToken cancellationToken = default)
+        public async Task<AuthRole?> UpdateAsync(int roleId, string name, string? description, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var role = await _dbContext.AuthRole
+                .FirstOrDefaultAsync(r => r.AuthRoleId == roleId, cancellationToken);
+
+            if (role == null)
+                return null;
+
+            role.Name = name;
+            role.Description = description;
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return role;
         }
     }
 }

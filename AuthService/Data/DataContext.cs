@@ -99,9 +99,13 @@ public partial class DataContext : DbContext
 
             entity.HasIndex(e => e.IsActive, "idx_auth_user_active").HasFilter("(is_deleted = false)");
 
-            entity.HasIndex(e => e.IsDeleted, "idx_auth_user_softdelete");
+            entity.HasIndex(e => e.Email, "idx_auth_user_email");
+
+            entity.HasIndex(e => e.AuthUserId, "idx_auth_user_not_deleted").HasFilter("(is_deleted = false)");
 
             entity.HasIndex(e => e.Username, "idx_auth_user_username");
+
+            entity.HasIndex(e => e.Email, "uq_auth_user_email").IsUnique();
 
             entity.HasIndex(e => e.Username, "uq_auth_user_username").IsUnique();
 
@@ -116,6 +120,9 @@ public partial class DataContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("deleted_by");
             entity.Property(e => e.DeletedDate).HasColumnName("deleted_date");
+            entity.Property(e => e.Email)
+                .HasMaxLength(100)
+                .HasColumnName("email");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
                 .HasColumnName("is_active");
@@ -132,7 +139,7 @@ public partial class DataContext : DbContext
                 .HasColumnName("updated_by");
             entity.Property(e => e.UpdatedDate).HasColumnName("updated_date");
             entity.Property(e => e.Username)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .HasColumnName("username");
         });
 
