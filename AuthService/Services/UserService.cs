@@ -6,7 +6,7 @@ using AuthService.Repositories;
 namespace AuthService.Services;
 
 /// <summary>
-/// Implements user list, update, and soft delete using the user repository.
+/// Implements user list, update, and soft delete using the user repository. <see cref="IUserService"/>.
 /// </summary>
 public class UserService : IUserService
 {
@@ -26,7 +26,8 @@ public class UserService : IUserService
 
         var dtos = items.Select(x => new UserListItemDto(
             Id: x.User.AuthUserId,
-            Email: x.User.Username,
+            Username: x.User.Username,
+            Email: x.User.Email,
             IsActive: x.User.IsActive,
             IsLocked: x.User.IsLocked,
             Roles: x.Roles,
@@ -37,7 +38,7 @@ public class UserService : IUserService
         return Result<PagedResult<UserListItemDto>>.Success(paged);
     }
 
-    public async Task<Result<UserListItemDto>> UpdateAsync(int userId, UpdateUserRequest request, string? updatedBy, CancellationToken cancellationToken = default)
+    public async Task<Result<UserListItemDto>> UpdateAsync(int userId, UpdateUserRequest request, CancellationToken cancellationToken = default)
     {
         var (user, roles) = await _userRepository.UpdateAsync(
             userId,
@@ -45,7 +46,6 @@ public class UserService : IUserService
             request.IsActive,
             request.IsLocked,
             request.Roles,
-            updatedBy,
             cancellationToken);
 
         if (user == null)
@@ -53,7 +53,8 @@ public class UserService : IUserService
 
         var dto = new UserListItemDto(
             Id: user.AuthUserId,
-            Email: user.Username,
+            Username: user.Username,
+            Email: user.Email,
             IsActive: user.IsActive,
             IsLocked: user.IsLocked,
             Roles: roles,

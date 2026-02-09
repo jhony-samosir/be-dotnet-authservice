@@ -7,6 +7,7 @@ namespace AuthService.Contracts.Response;
 /// </summary>
 public record UserListItemDto(
     [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("username")] string Username,
     [property: JsonPropertyName("email")] string Email,
     [property: JsonPropertyName("is_active")] bool IsActive,
     [property: JsonPropertyName("is_locked")] bool IsLocked,

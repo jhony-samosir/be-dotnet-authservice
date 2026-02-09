@@ -1,7 +1,6 @@
 using AuthService.Common;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
-using AuthService.DTOs;
 using AuthService.Domain;
 using AuthService.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -70,8 +69,6 @@ namespace AuthService.Services
             var (user, roles) = await _userRepository.CreateAsync(
                 emailOrUsername: req.Email,
                 passwordHash: passwordHash,
-                roleNames: req.Roles,
-                createdBy: null,
                 cancellationToken: cancellationToken);
 
             var (token, expiresInSeconds) = _tokenService.GenerateAccessToken(user, roles);

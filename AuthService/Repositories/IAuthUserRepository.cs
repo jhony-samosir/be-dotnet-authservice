@@ -15,8 +15,6 @@ namespace AuthService.Repositories
         Task<(AuthUser User, List<string> Roles)> CreateAsync(
             string emailOrUsername,
             string passwordHash,
-            IEnumerable<string>? roleNames,
-            string? createdBy,
             CancellationToken cancellationToken = default);
         Task<(List<(AuthUser User, List<string> Roles)> Items, int TotalCount)> GetPagedAsync(
             int page,
@@ -32,7 +30,6 @@ namespace AuthService.Repositories
             bool? isActive,
             bool? isLocked,
             IReadOnlyList<string>? roleNames,
-            string? updatedBy,
             CancellationToken cancellationToken = default);
         Task<bool> SoftDeleteAsync(int userId, CancellationToken cancellationToken = default);
     }

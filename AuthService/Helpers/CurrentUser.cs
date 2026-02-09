@@ -18,7 +18,7 @@ namespace AuthService.Helpers
                 User?.Claims
                     .GroupBy(c => c.Type)
                     .ToDictionary(g => g.Key, g => g.First().Value)
-                ?? new());
+                ?? []);
         }
 
         public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
@@ -71,7 +71,6 @@ namespace AuthService.Helpers
         public string? LoginName => Get(AppConstants.LoginName);
         public bool IsAdmin => GetBool(AppConstants.IsAdmin);
         public string? RoleId => Get(AppConstants.RoleId);
-        public string? EmailMasked => Get(AppConstants.EmailMasked);
         public string? Token => GetToken();
     }
 }

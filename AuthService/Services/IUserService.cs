@@ -10,6 +10,6 @@ namespace AuthService.Services;
 public interface IUserService
 {
     Task<Result<PagedResult<UserListItemDto>>> GetListAsync(int page, int pageSize, CancellationToken cancellationToken = default);
-    Task<Result<UserListItemDto>> UpdateAsync(int userId, UpdateUserRequest request, string? updatedBy, CancellationToken cancellationToken = default);
+    Task<Result<UserListItemDto>> UpdateAsync(int userId, UpdateUserRequest request, CancellationToken cancellationToken = default);
     Task<Result<bool>> SoftDeleteAsync(int userId, CancellationToken cancellationToken = default);
 }

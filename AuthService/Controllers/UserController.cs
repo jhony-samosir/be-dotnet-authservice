@@ -47,9 +47,7 @@ public class UserController : ControllerBase
         [FromBody] UpdateUserRequest request,
         CancellationToken cancellationToken = default)
     {
-        var updatedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        var result = await _userService.UpdateAsync(id, request, updatedBy, cancellationToken);
+        var result = await _userService.UpdateAsync(id, request, cancellationToken);
 
         if (!result.IsSuccess || result.Value is null)
         {

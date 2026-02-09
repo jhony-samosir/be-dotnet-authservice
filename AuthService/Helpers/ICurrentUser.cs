@@ -10,7 +10,6 @@
         string? LoginName { get; }
         bool IsAdmin { get; }
         string? RoleId { get; }
-        string? EmailMasked { get; }
         string? Token { get; }
         string? Get(string claim);
     }

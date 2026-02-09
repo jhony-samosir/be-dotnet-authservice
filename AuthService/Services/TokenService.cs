@@ -12,6 +12,7 @@ namespace AuthService.Services
     /// Responsible for generating JWT access tokens.
     /// Depends only on configuration and BCL types, which keeps it
     /// easy to test and reuse.
+    /// Implement of <see cref="ITokenService"/>.
     /// </summary>
     public class TokenService : ITokenService
     {
@@ -25,6 +26,7 @@ namespace AuthService.Services
         public (string Token, int ExpiresInSeconds) GenerateAccessToken(AuthUser user, IEnumerable<string> roles)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SigningKey));
+
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var now = DateTime.UtcNow;
@@ -35,7 +37,11 @@ namespace AuthService.Services
                 new(JwtRegisteredClaimNames.Sub, user.AuthUserId.ToString()),
                 new(ClaimTypes.NameIdentifier, user.AuthUserId.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Username),
-                new(ClaimTypes.Name, user.Username)
+                new(ClaimTypes.Name, user.Username),
+
+                new("CurrentUserID", user.AuthUserId.ToString()),
+                new("CurrentUserName", user.Username),
+                new("LoginName", user.Username)
             };
 
             foreach (var role in roles)

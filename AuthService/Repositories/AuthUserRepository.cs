@@ -63,15 +63,36 @@ namespace AuthService.Repositories
         public async Task<(AuthUser User, List<string> Roles)> CreateAsync(
             string emailOrUsername,
             string passwordHash,
-            IEnumerable<string>? roleNames,
-            string? createdBy,
             CancellationToken cancellationToken = default)
         {
             var now = DateTime.UtcNow;
 
+            // Get Role Default
+            var roleDefault = await _dbContext.AuthRole
+                .FirstOrDefaultAsync(x => x.Name == "Default", cancellationToken);
+
+            if (roleDefault == null)
+            {
+                roleDefault = new AuthRole
+                {
+                    Name = "Default",
+                    Description = "Role Default",
+                    CreatedBy = "System"
+                };
+
+                _dbContext.AuthRole.Add(roleDefault);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            // Get username from email
+            var username = emailOrUsername.Contains('@')
+                ? emailOrUsername.Split('@')[0]
+                : emailOrUsername;
+
             var user = new AuthUser
             {
-                Username = emailOrUsername,
+                Username = username,
+                Email = emailOrUsername,
                 PasswordHash = passwordHash,
                 IsActive = true,
                 IsLocked = false,
@@ -81,43 +102,18 @@ namespace AuthService.Repositories
             _dbContext.AuthUser.Add(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            var rolesList = new List<string>();
-
-            if (roleNames != null)
+            var userRole = new AuthUserRole
             {
-                var normalizedRoleNames = roleNames
-                    .Where(r => !string.IsNullOrWhiteSpace(r))
-                    .Select(r => r.Trim())
-                    .Distinct()
-                    .ToList();
+                AuthUserId = user.AuthUserId,
+                AuthRoleId = roleDefault.AuthRoleId,
+                AssignedBy = "System",
+                AssignedDate = now
+            };
 
-                if (normalizedRoleNames.Count > 0)
-                {
-                    var roles = await _dbContext.AuthRole
-                        .Where(r => normalizedRoleNames.Contains(r.Name) && !r.IsDeleted)
-                        .ToListAsync(cancellationToken);
+            _dbContext.AuthUserRole.Add(userRole);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-                    foreach (var role in roles)
-                    {
-                        var userRole = new AuthUserRole
-                        {
-                            AuthUserId = user.AuthUserId,
-                            AuthRoleId = role.AuthRoleId,
-                            AssignedDate = now,
-                            AssignedBy = createdBy,
-                            IsDeleted = false
-                        };
-
-                        _dbContext.AuthUserRole.Add(userRole);
-                        rolesList.Add(role.Name);
-                    }
-
-                    if (roles.Count > 0)
-                    {
-                        await _dbContext.SaveChangesAsync(cancellationToken);
-                    }
-                }
-            }
+            var rolesList = new List<string> { roleDefault.Name };
 
             return (user, rolesList);
         }
@@ -154,7 +150,7 @@ namespace AuthService.Repositories
                 .GroupBy(x => x.AuthUserId)
                 .ToDictionary(g => g.Key, g => g.Select(x => x.Name).ToList());
 
-            var items = users.Select(u => (User: u, Roles: rolesByUser.GetValueOrDefault(u.AuthUserId, new List<string>()))).ToList();
+            var items = users.Select(u => (User: u, Roles: rolesByUser.GetValueOrDefault(u.AuthUserId, []))).ToList();
             return (items, totalCount);
         }
 
@@ -186,7 +182,6 @@ namespace AuthService.Repositories
             bool? isActive,
             bool? isLocked,
             IReadOnlyList<string>? roleNames,
-            string? updatedBy,
             CancellationToken cancellationToken = default)
         {
             var (user, _) = await GetByIdWithRolesAsync(userId, includeDeleted: false, cancellationToken);
@@ -221,7 +216,6 @@ namespace AuthService.Repositories
                             AuthUserId = userId,
                             AuthRoleId = role.AuthRoleId,
                             AssignedDate = now,
-                            AssignedBy = updatedBy,
                             IsDeleted = false
                         });
                     }
