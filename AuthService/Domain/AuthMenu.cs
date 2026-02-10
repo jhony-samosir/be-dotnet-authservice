@@ -3,23 +3,19 @@ using System.Collections.Generic;
 
 namespace AuthService.Domain;
 
-public partial class AuthUser
+public partial class AuthMenu
 {
-    public int AuthUserId { get; set; }
+    public int AuthMenuId { get; set; }
 
-    public int AuthTenantId { get; set; }
+    public string Name { get; set; } = null!;
 
-    public string Username { get; set; } = null!;
+    public string? Path { get; set; }
 
-    public string Email { get; set; } = null!;
+    public string? Icon { get; set; }
 
-    public string PasswordHash { get; set; } = null!;
+    public int? ParentId { get; set; }
 
-    public bool IsActive { get; set; }
-
-    public bool IsLocked { get; set; }
-
-    public DateTime? LastLoginDate { get; set; }
+    public int? SortOrder { get; set; }
 
     public DateTime CreatedDate { get; set; }
 

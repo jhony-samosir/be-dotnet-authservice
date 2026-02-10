@@ -39,6 +39,11 @@ namespace AuthService.Services
                 return Result<AuthResponse>.Failure("Invalid credentials.");
             }
 
+            // Audit Login Date
+            var isAudited = await _userRepository.AuditLoginDate(user.AuthUserId, cancellationToken);
+            if (!isAudited)
+                return Result<AuthResponse>.Failure("Failure Audit Login Date");
+
             var (token, expiresInSeconds) = _tokenService.GenerateAccessToken(user, roles);
 
             var response = new AuthResponse(

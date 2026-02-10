@@ -3,8 +3,9 @@ using System.Linq.Expressions;
 
 namespace AuthService.Data;
 
-public partial class DataContext
+public partial class DataContext : DbContext
 {
+    public DataContextFlags Flags { get; } = new();
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder)
     {
         // === SOFT DELETE GLOBAL FILTER ===
@@ -24,7 +25,7 @@ public partial class DataContext
                 Expression.Call(
                     typeof(EF),
                     nameof(EF.Property),
-                    new[] { typeof(bool) },
+                    [typeof(bool)],
                     parameter,
                     Expression.Constant("IsDeleted")
                 ),
@@ -33,6 +34,19 @@ public partial class DataContext
 
             modelBuilder.Entity(entity.ClrType)
                 .HasQueryFilter(Expression.Lambda(body, parameter));
+        }
+    }
+    public async Task<int> SaveChangesSkipAuditAsync(CancellationToken cancellationToken = default)
+    {
+        Flags.SkipAudit = true;
+
+        try
+        {
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+        finally
+        {
+            Flags.SkipAudit = false;
         }
     }
 }

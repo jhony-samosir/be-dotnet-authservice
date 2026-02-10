@@ -94,6 +94,7 @@ namespace AuthService.Repositories
                 Username = username,
                 Email = emailOrUsername,
                 PasswordHash = passwordHash,
+                AuthTenantId = 1, // Default Tenant
                 IsActive = true,
                 IsLocked = false,
                 IsDeleted = false
@@ -105,9 +106,7 @@ namespace AuthService.Repositories
             var userRole = new AuthUserRole
             {
                 AuthUserId = user.AuthUserId,
-                AuthRoleId = roleDefault.AuthRoleId,
-                AssignedBy = "System",
-                AssignedDate = now
+                AuthRoleId = roleDefault.AuthRoleId
             };
 
             _dbContext.AuthUserRole.Add(userRole);
@@ -189,7 +188,12 @@ namespace AuthService.Repositories
                 return (null, new List<string>());
 
             if (email != null)
-                user.Username = email;
+            {
+                // Get username from email
+                var username = email.Contains('@') ? email.Split('@')[0] : email;
+                user.Username = username;
+                user.Email = email;
+            }
             if (isActive.HasValue)
                 user.IsActive = isActive.Value;
             if (isLocked.HasValue)
@@ -200,8 +204,10 @@ namespace AuthService.Repositories
                 var existing = await _dbContext.AuthUserRole
                     .Where(ur => ur.AuthUserId == userId && !ur.IsDeleted)
                     .ToListAsync(cancellationToken);
+
                 foreach (var ur in existing)
                     ur.IsDeleted = true;
+
                 var now = DateTime.UtcNow;
                 var normalized = roleNames.Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => r.Trim()).Distinct().ToList();
                 if (normalized.Count > 0)
@@ -215,7 +221,6 @@ namespace AuthService.Repositories
                         {
                             AuthUserId = userId,
                             AuthRoleId = role.AuthRoleId,
-                            AssignedDate = now,
                             IsDeleted = false
                         });
                     }
@@ -242,6 +247,19 @@ namespace AuthService.Repositories
 
             _dbContext.AuthUser.Remove(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> AuditLoginDate(int userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _dbContext.AuthUser
+                .FirstOrDefaultAsync(u => u.AuthUserId == userId && !u.IsDeleted, cancellationToken);
+            if (user == null)
+                return false;
+
+            user.LastLoginDate = DateTime.UtcNow;
+            _dbContext.AuthUser.Update(user);
+            await _dbContext.SaveChangesSkipAuditAsync(cancellationToken);
             return true;
         }
     }

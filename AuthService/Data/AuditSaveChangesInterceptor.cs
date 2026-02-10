@@ -34,6 +34,9 @@ public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 
     private void ApplyAudit(DbContext context)
     {
+        if (context is DataContext db && db.Flags.SkipAudit)
+            return;
+
         var now = DateTime.UtcNow;
         var user = CurrentUser;
 

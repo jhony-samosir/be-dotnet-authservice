@@ -17,7 +17,7 @@ namespace AuthService.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<AuthRole> CreateAsync(string name, string description, CancellationToken cancellationToken = default)
+        public async Task<AuthRole> CreateAsync(string name, string? description, CancellationToken cancellationToken = default)
         {
             var role = new AuthRole
             {
