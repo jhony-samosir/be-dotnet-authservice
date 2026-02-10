@@ -7,21 +7,14 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AuthService.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService(
+        IAuthUserRepository userRepository,
+        ITokenService tokenService,
+        IPasswordHasher<AuthUser> passwordHasher) : IAuthService
     {
-        private readonly IAuthUserRepository _userRepository;
-        private readonly ITokenService _tokenService;
-        private readonly IPasswordHasher<AuthUser> _passwordHasher;
-
-        public AuthService(
-            IAuthUserRepository userRepository,
-            ITokenService tokenService,
-            IPasswordHasher<AuthUser> passwordHasher)
-        {
-            _userRepository = userRepository;
-            _tokenService = tokenService;
-            _passwordHasher = passwordHasher;
-        }
+        private readonly IAuthUserRepository _userRepository = userRepository;
+        private readonly ITokenService _tokenService = tokenService;
+        private readonly IPasswordHasher<AuthUser> _passwordHasher = passwordHasher;
 
         public async Task<Result<AuthResponse>> Login(AuthRequest req, CancellationToken cancellationToken = default)
         {

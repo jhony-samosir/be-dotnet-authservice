@@ -8,14 +8,9 @@ namespace AuthService.Repositories
     /// EF Core implementation of <see cref="IAuthUserRepository"/>.
     /// Uses the existing <see cref="DataContext"/> and database schema.
     /// </summary>
-    public class AuthUserRepository : IAuthUserRepository
+    public class AuthUserRepository(DataContext dbContext) : IAuthUserRepository
     {
-        private readonly DataContext _dbContext;
-
-        public AuthUserRepository(DataContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        private readonly DataContext _dbContext = dbContext;
 
         public async Task<(AuthUser? User, List<string> Roles)> GetByEmailWithRolesAsync(
             string emailOrUsername,

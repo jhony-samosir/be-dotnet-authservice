@@ -8,14 +8,9 @@ namespace AuthService.Repositories
     /// EF Core implementation of <see cref="IRoleRepository"/>.
     /// Uses the existing <see cref="DataContext"/> and database schema.
     /// </summary>
-    public class RoleRepository : IRoleRepository
+    public class RoleRepository(DataContext dbContext) : IRoleRepository
     {
-        private readonly DataContext _dbContext;
-
-        public RoleRepository(DataContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        private readonly DataContext _dbContext = dbContext;
 
         public async Task<AuthRole> CreateAsync(string name, string? description, CancellationToken cancellationToken = default)
         {

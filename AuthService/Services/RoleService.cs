@@ -8,13 +8,9 @@ namespace AuthService.Services;
 /// <summary>
 /// Implements role list, update, and soft delete using the role repository. <see cref="IRoleService"/>.
 /// </summary>
-public class RoleService : IRoleService
+public class RoleService(IRoleRepository roleRepository) : IRoleService
 {
-    private readonly IRoleRepository _roleRepository;
-    public RoleService(IRoleRepository roleRepository)
-    {
-        _roleRepository = roleRepository;
-    }
+    private readonly IRoleRepository _roleRepository = roleRepository;
 
     public async Task<Result<RoleListItemDto>> CreateAsync(RoleRequest request, CancellationToken cancellationToken = default)
     {

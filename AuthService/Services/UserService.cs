@@ -8,14 +8,9 @@ namespace AuthService.Services;
 /// <summary>
 /// Implements user list, update, and soft delete using the user repository. <see cref="IUserService"/>.
 /// </summary>
-public class UserService : IUserService
+public class UserService(IAuthUserRepository userRepository) : IUserService
 {
-    private readonly IAuthUserRepository _userRepository;
-
-    public UserService(IAuthUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
+    private readonly IAuthUserRepository _userRepository = userRepository;
 
     public async Task<Result<PagedResult<UserListItemDto>>> GetListAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {

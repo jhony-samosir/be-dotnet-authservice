@@ -5,13 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Data;
 
-public partial class DataContext : DbContext
+public partial class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
 {
-    public DataContext(DbContextOptions<DataContext> options)
-        : base(options)
-    {
-    }
-
     public virtual DbSet<AuthMenu> AuthMenu { get; set; }
 
     public virtual DbSet<AuthMenuPermission> AuthMenuPermission { get; set; }

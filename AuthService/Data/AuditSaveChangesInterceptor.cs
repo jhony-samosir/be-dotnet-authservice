@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace AuthService.Data;
 
-public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
+public sealed class AuditSaveChangesInterceptor(ICurrentUser currentUser) : SaveChangesInterceptor
 {
-    private readonly ICurrentUser _currentUser;
-
-    public AuditSaveChangesInterceptor(ICurrentUser currentUser)
-    {
-        _currentUser = currentUser;
-    }
+    private readonly ICurrentUser _currentUser = currentUser;
 
     private string CurrentUser =>
         !string.IsNullOrWhiteSpace(_currentUser.UserName)

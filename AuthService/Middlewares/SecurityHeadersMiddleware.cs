@@ -8,10 +8,10 @@ namespace AuthService.Middlewares;
 /// Adds standard security and cache-control headers to every response.
 /// Should be registered early in the pipeline so all responses (including errors) get the headers.
 /// </summary>
-public sealed class SecurityHeadersMiddleware
+public sealed class SecurityHeadersMiddleware(RequestDelegate next, IOptions<SecurityHeadersOptions> options)
 {
-    private readonly RequestDelegate _next;
-    private readonly SecurityHeadersOptions _options;
+    private readonly RequestDelegate _next = next;
+    private readonly SecurityHeadersOptions _options = options.Value;
 
     private const string HeaderAccessControlAllowHeaders = "Access-Control-Allow-Headers";
     private const string HeaderAccessControlAllowMethods = "Access-Control-Allow-Methods";
@@ -25,12 +25,6 @@ public sealed class SecurityHeadersMiddleware
     private const string HeaderXContentTypeOptions = "X-Content-Type-Options";
     private const string HeaderXFrameOptions = "X-Frame-Options";
 
-    public SecurityHeadersMiddleware(RequestDelegate next, IOptions<SecurityHeadersOptions> options)
-    {
-        _next = next;
-        _options = options.Value;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         var response = context.Response;
@@ -39,8 +33,7 @@ public sealed class SecurityHeadersMiddleware
         {
             response.OnStarting(() =>
             {
-                if (response.Headers.ContainsKey(HeaderServer))
-                    response.Headers.Remove(HeaderServer);
+                response.Headers.Remove(HeaderServer);
                 return Task.CompletedTask;
             });
         }
