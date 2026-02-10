@@ -14,13 +14,9 @@ namespace AuthService.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class RoleController : Controller
+public class RoleController(IRoleService roleService) : Controller
 {
-    private readonly IRoleService _roleService;
-    public RoleController(IRoleService roleService)
-    {
-        _roleService = roleService;
-    }
+    private readonly IRoleService _roleService = roleService;
 
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponse<RoleListItemDto>), StatusCodes.Status201Created)]

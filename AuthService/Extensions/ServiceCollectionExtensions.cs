@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAuthApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers();
+        services.AddHealthChecks().AddDbContextCheck<DataContext>();
 
         services.AddValidatorsFromAssemblyContaining<AuthRequestValidator>();
 
@@ -140,9 +141,7 @@ public static class ServiceCollectionExtensions
                 };
             });
 
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-        });
+        services.AddAuthorizationBuilder()
+            .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     }
 }

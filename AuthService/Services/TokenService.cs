@@ -14,14 +14,9 @@ namespace AuthService.Services
     /// easy to test and reuse.
     /// Implement of <see cref="ITokenService"/>.
     /// </summary>
-    public class TokenService : ITokenService
+    public class TokenService(IOptions<JwtSettings> jwtOptions) : ITokenService
     {
-        private readonly JwtSettings _jwtSettings;
-
-        public TokenService(IOptions<JwtSettings> jwtOptions)
-        {
-            _jwtSettings = jwtOptions.Value;
-        }
+        private readonly JwtSettings _jwtSettings = jwtOptions.Value;
 
         public (string Token, int ExpiresInSeconds) GenerateAccessToken(AuthUser user, IEnumerable<string> roles)
         {

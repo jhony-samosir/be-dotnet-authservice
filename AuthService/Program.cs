@@ -10,5 +10,5 @@ var app = builder.Build();
 
 // Configure pipeline via middlewares
 app.UseAuthPipeline();
-
+app.MapHealthChecks("/healthz");
 app.Run();
