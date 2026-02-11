@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace AuthService.UnitTests.Helpers;
 
-public class CurrentUserTests
+public class CurrentUserTests : TestBase
 {
     private static CurrentUser CreateUser(params Claim[] claims)
     {

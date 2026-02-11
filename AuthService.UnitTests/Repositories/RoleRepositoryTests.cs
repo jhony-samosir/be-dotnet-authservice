@@ -6,17 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.UnitTests.Repositories;
 
-public class RoleRepositoryTests
+public class RoleRepositoryTests : TestBase
 {
-    private static DataContext CreateDb()
-    {
-        var options = new DbContextOptionsBuilder<DataContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        return new DataContext(options);
-    }
-
     // =========================
     // CREATE
     // =========================

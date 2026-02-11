@@ -7,7 +7,7 @@ using Moq;
 
 namespace AuthService.UnitTests.Interceptors;
 
-public class AuditSaveChangesInterceptorTests
+public class AuditSaveChangesInterceptorTests : TestBase
 {
     private static DataContext CreateDb(ICurrentUser currentUser)
     {

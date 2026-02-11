@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace AuthService.UnitTests.Services;
 
-public class TokenServiceTests
+public class TokenServiceTests : TestBase
 {
     private static TokenService CreateService()
     {

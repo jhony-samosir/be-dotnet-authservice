@@ -9,14 +9,17 @@ using Moq;
 
 namespace AuthService.UnitTests.Services;
 
-public class AuthServiceTests
+public class AuthServiceTests : TestBase
 {
     private readonly Mock<IAuthUserRepository> _repo = new();
     private readonly Mock<ITokenService> _token = new();
     private readonly Mock<IPasswordHasher<AuthUser>> _hasher = new();
 
     private AuthService.Services.AuthService CreateService()
-        => new(_repo.Object, _token.Object, _hasher.Object);
+    {
+        AuthService.Services.AuthService authService = new(_repo.Object, _token.Object, _hasher.Object);
+        return authService;
+    }
 
     private static AuthUser CreateUser()
         => new()

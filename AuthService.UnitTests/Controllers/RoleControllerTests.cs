@@ -9,7 +9,7 @@ using Moq;
 
 namespace AuthService.UnitTests.Controllers;
 
-public class RoleControllerTests
+public class RoleControllerTests : TestBase
 {
     private readonly Mock<IRoleService> _service = new();
 
