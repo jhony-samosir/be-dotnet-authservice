@@ -4,8 +4,6 @@ using AuthService.Domain;
 using AuthService.Helpers;
 using AuthService.Repositories;
 using AuthService.Services;
-using AuthService.Validators;
-using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,8 +22,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddControllers();
         services.AddHealthChecks().AddDbContextCheck<DataContext>();
-
-        services.AddValidatorsFromAssemblyContaining<AuthRequestValidator>();
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
