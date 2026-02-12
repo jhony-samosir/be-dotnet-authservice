@@ -9,6 +9,7 @@ builder.Services.AddAuthApplicationServices(builder.Configuration);
 var app = builder.Build();
 
 // Configure pipeline via middlewares
+app.UseCors("FrontendPolicy");
 app.UseAuthPipeline();
 app.MapHealthChecks("/healthz");
 app.Run();

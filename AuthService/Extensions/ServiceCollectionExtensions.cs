@@ -65,6 +65,7 @@ public static class ServiceCollectionExtensions
         AddSecurityHeaders(services, configuration);
         AddApplicationServices(services);
         AddJwtAuthentication(services, configuration);
+        AddCorsConfiguration(services);
 
         return services;
     }
@@ -139,5 +140,19 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorizationBuilder()
             .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    }
+
+    private static void AddCorsConfiguration(IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("FrontendPolicy", policy =>
+            {
+                policy.WithOrigins("http://localhost:5173")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
+        });
     }
 }
