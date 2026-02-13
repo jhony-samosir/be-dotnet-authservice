@@ -1,6 +1,6 @@
-﻿using AuthService.Common;
+﻿using AuthService.Common.Results;
+using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
-using AuthService.Contracts.Response;
 using AuthService.Controllers;
 using AuthService.Services;
 using FluentAssertions;

@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-namespace AuthService.Contracts.Response;
+namespace AuthService.Contracts.DTOs;
 
 /// <summary>
 /// Role item for list responses.
@@ -8,5 +8,5 @@ public record RoleListItemDto(
     [property: JsonPropertyName("id")] int Id,
     [property: JsonPropertyName("role_name")] string Name,
     [property: JsonPropertyName("role_description")] string Description,
-    [property: JsonPropertyName("created_date")] DateTime CreatedDate
+    [property: JsonPropertyName("created_date")] DateTime? CreatedDate
 );

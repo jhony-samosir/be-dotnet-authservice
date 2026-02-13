@@ -1,3 +1,4 @@
+using AuthService.Common.Swagger;
 using AuthService.Configuration;
 using AuthService.Data;
 using AuthService.Domain;
@@ -57,6 +58,8 @@ public static class ServiceCollectionExtensions
                     Array.Empty<string>()
                 }
             });
+
+            options.OperationFilter<ApiResultOperationFilter>();
         });
 
 
@@ -103,6 +106,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IPasswordService, PasswordService>();
     }
 
     private static void AddJwtAuthentication(IServiceCollection services, IConfiguration configuration)

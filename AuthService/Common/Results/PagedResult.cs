@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AuthService.Contracts.Response;
+namespace AuthService.Common.Results;
 
 /// <summary>
 /// Paged list result with total count for list endpoints.

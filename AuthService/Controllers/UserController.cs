@@ -1,10 +1,13 @@
-using AuthService.Common;
+using AuthService.Common.Querying;
+using AuthService.Common.Results;
+using AuthService.Common.Swagger;
+using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
+using AuthService.Extensions;
 using AuthService.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace AuthService.Controllers;
 
@@ -19,55 +22,45 @@ public class UserController(IUserService userService) : ControllerBase
     private readonly IUserService _userService = userService;
 
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponse<PagedResult<UserListItemDto>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetList(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
-        CancellationToken cancellationToken = default)
+    [ApiResult(typeof(ApiResponse<PagedResult<UserListItemDto>>))]
+    public async Task<IActionResult> GetList([FromQuery] QueryOptions query, CancellationToken cancellationToken = default)
     {
-        var result = await _userService.GetListAsync(page, pageSize, cancellationToken);
-
-        if (!result.IsSuccess || result.Value is null)
-            return BadRequest(new ApiResponse<PagedResult<UserListItemDto>>(false, result.Error ?? "Failed to get list.", null));
-
-        return Ok(new ApiResponse<PagedResult<UserListItemDto>>(true, "OK", result.Value));
+        var result = await _userService.GetListAsync(query, cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpPut("{id:int}")]
-    [ProducesResponseType(typeof(ApiResponse<UserListItemDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ApiResult(typeof(ApiResponse<UserListItemDto>))]
     public async Task<IActionResult> Update(
         int id,
         [FromBody] UpdateUserRequest request,
         CancellationToken cancellationToken = default)
     {
         var result = await _userService.UpdateAsync(id, request, cancellationToken);
+        return result.ToActionResult();
+    }
 
-        if (!result.IsSuccess || result.Value is null)
-        {
-            if (result.Error?.Contains("not found") == true)
-                return NotFound(new ApiResponse<UserListItemDto>(result.IsSuccess, result.Error ?? "User not found.", null));
-            return BadRequest(new ApiResponse<UserListItemDto>(result.IsSuccess, result.Error ?? "Update failed.", null));
-        }
+    [HttpGet("{id:int}")]
+    [ApiResult(typeof(ApiResponse<UserListItemDto>))]
+    public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken = default)
+    {
+        var result = await _userService.GetByIdAsync(id, cancellationToken);
+        return result.ToActionResult();
+    }
 
-        return Ok(new ApiResponse<UserListItemDto>(result.IsSuccess, "Updated", result.Value));
+    [HttpPost("{id:int}/roles")]
+    [ApiResult(typeof(ApiResponse<bool>))]
+    public async Task<IActionResult> AssignRoles(int id, [FromBody] AssignRoleRequest request, CancellationToken cancellationToken = default)
+    {
+        var result = await _userService.AssignRolesAsync(id, request, cancellationToken);
+        return result.ToActionResult();
     }
 
     [HttpDelete("{id:int}")]
-    [ProducesResponseType(typeof(ApiResponse<bool>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ApiResult(typeof(ApiResponse<bool>))]
     public async Task<IActionResult> SoftDelete(int id, CancellationToken cancellationToken = default)
     {
         var result = await _userService.SoftDeleteAsync(id, cancellationToken);
-
-        if (!result.IsSuccess)
-        {
-            if (result.Error?.Contains("not found") == true || result.Error?.Contains("already deleted") == true)
-                return NotFound(new ApiResponse<bool>(result.IsSuccess, result.Error ?? "User not found or already deleted.", false));
-            return BadRequest(new ApiResponse<bool>(result.IsSuccess, result.Error ?? "Delete failed.", false));
-        }
-
-        return Ok(new ApiResponse<bool>(result.IsSuccess, "Deleted", true));
+        return result.ToActionResult();
     }
 }

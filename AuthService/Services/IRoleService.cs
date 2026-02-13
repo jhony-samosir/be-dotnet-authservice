@@ -1,6 +1,7 @@
-﻿using AuthService.Common;
+﻿using AuthService.Common.Querying;
+using AuthService.Common.Results;
+using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
-using AuthService.Contracts.Response;
 
 namespace AuthService.Services;
 
@@ -9,8 +10,24 @@ namespace AuthService.Services;
 /// </summary>
 public interface IRoleService
 {
-    Task<Result<RoleListItemDto>> CreateAsync(RoleRequest request, CancellationToken cancellationToken = default);
-    Task<Result<PagedResult<RoleListItemDto>>> GetListAsync(int page, int pageSize, CancellationToken cancellationToken = default);
-    Task<Result<RoleListItemDto>> UpdateAsync(int roleId, RoleRequest request, CancellationToken cancellationToken = default);
-    Task<Result<bool>> SoftDeleteAsync(int roleId, CancellationToken cancellationToken = default);
+    Task<Result<RoleListItemDto>> CreateAsync(
+        RoleRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<PagedResult<RoleListItemDto>>> GetListAsync(
+        QueryOptions query,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<RoleListItemDto>> GetByIdAsync(
+        int roleId,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<RoleListItemDto>> UpdateAsync(
+        int roleId,
+        RoleRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<Result<bool>> SoftDeleteAsync(
+        int roleId,
+        CancellationToken cancellationToken = default);
 }

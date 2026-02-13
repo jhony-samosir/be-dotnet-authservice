@@ -9,7 +9,7 @@ public partial class AuthTenant
 
     public string Code { get; set; } = null!;
 
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
     public DateTime CreatedDate { get; set; }
 
