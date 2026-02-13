@@ -7,6 +7,7 @@ public static class PipelineMiddlewareExtensions
 {
     public static WebApplication UseAuthPipeline(this WebApplication app)
     {
+        app.UseExceptionMiddleware();
         app.UseSecurityHeaders();
 
         if (app.Environment.IsDevelopment())
@@ -26,6 +27,12 @@ public static class PipelineMiddlewareExtensions
     public static WebApplication UseSecurityHeaders(this WebApplication app)
     {
         app.UseMiddleware<SecurityHeadersMiddleware>();
+        return app;
+    }
+
+    public static WebApplication UseExceptionMiddleware(this WebApplication app)
+    {
+        app.UseMiddleware<ExceptionMiddleware>();
         return app;
     }
 }

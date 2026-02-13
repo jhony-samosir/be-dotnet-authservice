@@ -6,64 +6,92 @@ namespace AuthService.Extensions;
 
 public static class ResultExtensions
 {
-    public static IActionResult ToActionResult<T>(this Result<T> result)
+    // =====================================================
+    // GENERIC RESULT<T>
+    // =====================================================
+    public static IActionResult ToActionResult<T>(this Result<T> result, HttpContext? ctx = null)
     {
         if (result.IsSuccess)
         {
-            return new OkObjectResult(
-                ApiResponse<T>.Ok(result.Value!)
-            );
+            // SUCCESS → return raw data
+            return new OkObjectResult(result.Value);
         }
 
-        return result.Error.Code switch
+        var traceId = ctx?.TraceIdentifier;
+        var err = result.Error;
+
+        var error = new ApiErrorResponse
+        {
+            Message = err.Message,
+            ErrorCode = err.Code.ToString(),
+            TraceId = traceId
+        };
+
+        return err.Code switch
         {
             ErrorCode.Validation =>
-                new BadRequestObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new BadRequestObjectResult(error),
 
             ErrorCode.NotFound =>
-                new NotFoundObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new NotFoundObjectResult(error),
 
             ErrorCode.Conflict =>
-                new ConflictObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new ConflictObjectResult(error),
 
             ErrorCode.Unauthorized or ErrorCode.InvalidCredential or ErrorCode.TokenExpired =>
-                new UnauthorizedObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new UnauthorizedObjectResult(error),
 
             ErrorCode.Forbidden or ErrorCode.UserLocked =>
-                new ObjectResult(ApiResponse<string>.Fail(result.Error.Message))
+                new ObjectResult(error)
                 { StatusCode = StatusCodes.Status403Forbidden },
 
-            _ => new ObjectResult(ApiResponse<string>.Fail(result.Error.Message))
+            _ =>
+                new ObjectResult(error)
                 { StatusCode = StatusCodes.Status500InternalServerError }
         };
     }
 
-    // non generic result
-    public static IActionResult ToActionResult(this Result result)
+    // =====================================================
+    // NON GENERIC RESULT
+    // =====================================================
+    public static IActionResult ToActionResult(this Result result, HttpContext? ctx = null)
     {
         if (result.IsSuccess)
-            return new OkObjectResult(ApiResponse<string>.Ok("OK"));
+        {
+            return new OkResult();
+        }
 
-        return result.Error.Code switch
+        var traceId = ctx?.TraceIdentifier;
+        var err = result.Error;
+
+        var error = new ApiErrorResponse
+        {
+            Message = err.Message,
+            ErrorCode = err.Code.ToString(),
+            TraceId = traceId
+        };
+
+        return err.Code switch
         {
             ErrorCode.Validation =>
-                new BadRequestObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new BadRequestObjectResult(error),
 
             ErrorCode.NotFound =>
-                new NotFoundObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new NotFoundObjectResult(error),
 
             ErrorCode.Conflict =>
-                new ConflictObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new ConflictObjectResult(error),
 
             ErrorCode.Unauthorized or ErrorCode.InvalidCredential or ErrorCode.TokenExpired =>
-                new UnauthorizedObjectResult(ApiResponse<string>.Fail(result.Error.Message)),
+                new UnauthorizedObjectResult(error),
 
             ErrorCode.Forbidden or ErrorCode.UserLocked =>
-                new ObjectResult(ApiResponse<string>.Fail(result.Error.Message))
+                new ObjectResult(error)
                 { StatusCode = StatusCodes.Status403Forbidden },
 
-            _ => new ObjectResult(ApiResponse<string>.Fail(result.Error.Message))
-            { StatusCode = StatusCodes.Status500InternalServerError }
+            _ =>
+                new ObjectResult(error)
+                { StatusCode = StatusCodes.Status500InternalServerError }
         };
     }
 }
