@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Repositories;
 
-public class AuthRefreshTokenRepository(DataContext context, ICurrentUser currentUser) : IAuthRefreshTokenRepository
+public class AuthRefreshTokenRepository(DataContext context) : IAuthRefreshTokenRepository
 {
     private readonly DataContext _context = context;
 
