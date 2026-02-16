@@ -135,15 +135,17 @@ public class TenantRepository(DataContext dataContext) : ITenantRepository
         const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         var year = DateTime.UtcNow.Year;
 
-        Span<byte> buffer = stackalloc byte[4];
-        Span<char> randomChars = stackalloc char[4];
+        var buffer = new byte[4];
+        var randomChars = new char[4];
 
         for (int attempt = 0; attempt < 10; attempt++)
         {
             RandomNumberGenerator.Fill(buffer);
 
             for (int i = 0; i < 4; i++)
+            {
                 randomChars[i] = chars[buffer[i] % chars.Length];
+            }
 
             var code = $"TNT-{year}-{new string(randomChars)}";
 

@@ -108,6 +108,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<IAuthRefreshTokenRepository, AuthRefreshTokenRepository>();
+        services.AddScoped<ITenantRepository, TenantRepository>();
+        services.AddScoped<ITenantService, TenantService>();
     }
 
     private static void AddJwtAuthentication(IServiceCollection services, IConfiguration configuration)
