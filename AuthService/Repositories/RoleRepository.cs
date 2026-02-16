@@ -98,6 +98,7 @@ public class RoleRepository(DataContext dbContext) : IRoleRepository
         var whitelist = new HashSet<string>
         {
             nameof(RoleListProjection.Name),
+            nameof(RoleListProjection.Description),
             nameof(RoleListProjection.CreatedDate)
         };
 

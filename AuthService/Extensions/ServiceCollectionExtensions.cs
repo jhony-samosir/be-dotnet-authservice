@@ -152,7 +152,9 @@ public static class ServiceCollectionExtensions
         {
             options.AddPolicy("FrontendPolicy", policy =>
             {
-                policy.WithOrigins("http://localhost:5173")
+                policy.SetIsOriginAllowed(origin => 
+                        new Uri(origin).Host == "localhost" || 
+                        new Uri(origin).Host == "127.0.0.1")
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials();

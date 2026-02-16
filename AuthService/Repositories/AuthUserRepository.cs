@@ -65,20 +65,7 @@ public class AuthUserRepository(DataContext dbContext) : IAuthUserRepository
         CancellationToken ct = default)
     {
         var roleDefault = await _dbContext.AuthRole
-            .FirstOrDefaultAsync(x => x.Name == "Default", ct);
-
-        if (roleDefault == null)
-        {
-            roleDefault = new AuthRole
-            {
-                Name = "Default",
-                Description = "Role Default",
-                CreatedBy = "System"
-            };
-
-            _dbContext.AuthRole.Add(roleDefault);
-            await _dbContext.SaveChangesAsync(ct);
-        }
+            .FirstAsync(x => x.Name == "Default", ct);
 
         var username = emailOrUsername.Contains('@')
             ? emailOrUsername.Split('@')[0]
