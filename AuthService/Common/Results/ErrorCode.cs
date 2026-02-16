@@ -15,5 +15,6 @@ public enum ErrorCode
     // auth
     InvalidCredential,
     TokenExpired,
+    InvalidToken,
     UserLocked,
 }

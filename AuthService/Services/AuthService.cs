@@ -1,21 +1,30 @@
 using AuthService.Common.Results;
+using AuthService.Configuration;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
+using AuthService.Domain;
 using AuthService.Repositories;
+using Microsoft.Extensions.Options;
 
 namespace AuthService.Services;
 
 public class AuthService(
     IAuthUserRepository userRepository,
     ITokenService tokenService,
-    IPasswordService passwordService) : IAuthService
+    IPasswordService passwordService,
+    IAuthRefreshTokenRepository refreshTokenRepository,
+    IOptions<JwtSettings> jwtOptions) : IAuthService
 {
     private readonly IAuthUserRepository _userRepository = userRepository;
     private readonly ITokenService _tokenService = tokenService;
     private readonly IPasswordService _passwordService = passwordService;
+    private readonly IAuthRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
+    private readonly JwtSettings _jwtSettings = jwtOptions.Value;
 
     public async Task<Result<AuthResponse>> Login(
         AuthRequest req,
+        string? ipAddress = null,
+        string? deviceInfo = null,
         CancellationToken cancellationToken = default)
     {
         var user = await _userRepository
@@ -52,24 +61,7 @@ public class AuthService(
 
         await _userRepository.AuditLoginDateAsync(user.UserId, cancellationToken);
 
-        var (token, expiresInSeconds) =
-            _tokenService.GenerateAccessToken(
-                user.UserId,
-                user.Username,
-                user.Roles);
-
-        var response = new AuthResponse(
-            AccessToken: token,
-            ExpiresIn: expiresInSeconds,
-            TokenType: "Bearer",
-            User: new UserInfo(
-                Id: user.UserId,
-                Email: user.Email,
-                Roles: user.Roles
-            )
-        );
-
-        return Result<AuthResponse>.Success(response);
+        return await GenerateAuthResponseAsync(user, ipAddress, deviceInfo, cancellationToken);
     }
 
     public async Task<Result<AuthResponse>> Register(
@@ -101,20 +93,109 @@ public class AuthService(
                 new Error(ErrorCode.Unknown, "User creation failed"));
         }
 
-        var (token, expiresInSeconds) =
-            _tokenService.GenerateAccessToken(
-                loginUser.UserId,
-                loginUser.Username,
-                loginUser.Roles);
+        // For register, we can also generate refresh token immediately
+        return await GenerateAuthResponseAsync(loginUser, null, null, cancellationToken);
+    }
+
+    public async Task<Result<AuthResponse>> RefreshToken(
+        string token,
+        string? ipAddress = null,
+        string? deviceInfo = null,
+        CancellationToken cancellationToken = default)
+    {
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(token, cancellationToken);
+
+        if (existingToken is null)
+        {
+            return Result<AuthResponse>.Failure(
+                new Error(ErrorCode.InvalidToken, "Invalid refresh token"));
+        }
+
+        if (existingToken.RevokedDate != null)
+        {
+            // Token revocation check - Security feature: Token Reuse Detection
+            // If a revoked token is used, it might mean it was stolen.
+            // We should revoke all refresh tokens for this user family to be safe.
+            await _refreshTokenRepository.RevokeAllByUserIdAsync(existingToken.AuthUserId, cancellationToken);
+            
+            return Result<AuthResponse>.Failure(
+                new Error(ErrorCode.InvalidToken, "Token has been revoked"));
+        }
+
+        if (existingToken.ExpiredDate < DateTime.UtcNow)
+        {
+            return Result<AuthResponse>.Failure(
+                new Error(ErrorCode.InvalidToken, "Token expired"));
+        }
+
+        // Token Rotation: Revoke the used refresh token
+        await _refreshTokenRepository.RevokeAsync(existingToken.AuthRefreshTokenId, "Replaced by new token", cancellationToken);
+
+        var user = await _userRepository.GetByIdWithRolesAsync(existingToken.AuthUserId, cancellationToken);
+        if (user is null)
+        {
+             return Result<AuthResponse>.Failure(
+                new Error(ErrorCode.NotFound, "User not found"));
+        }
+
+        return await GenerateAuthResponseAsync(user, ipAddress, deviceInfo, cancellationToken);
+    }
+
+    public async Task<Result<bool>> RevokeToken(string token, CancellationToken cancellationToken = default)
+    {
+        var existingToken = await _refreshTokenRepository.GetByTokenAsync(token, cancellationToken);
+
+        if (existingToken is null)
+        {
+             return Result<bool>.Failure(
+                new Error(ErrorCode.NotFound, "Token not found"));
+        }
+        
+        // Ensure we are not double revoking if already revoked, although RevokeAsync handles idempotent logic usually.
+        if (existingToken.RevokedDate == null) 
+        {
+             await _refreshTokenRepository.RevokeAsync(existingToken.AuthRefreshTokenId, "Manual revocation", cancellationToken);
+        }
+
+        return Result<bool>.Success(true);
+    }
+
+    private async Task<Result<AuthResponse>> GenerateAuthResponseAsync(
+        Contracts.Projection.UserWithRolesProjection user, 
+        string? ipAddress, 
+        string? deviceInfo, 
+        CancellationToken cancellationToken)
+    {
+        var (accessToken, expiresInSeconds) = _tokenService.GenerateAccessToken(
+            user.UserId,
+            user.Username,
+            user.Roles);
+
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        var refreshTokenEntity = new AuthRefreshToken
+        {
+            AuthUserId = user.UserId,
+            Token = refreshToken,
+            IpAddress = ipAddress,
+            DeviceInfo = deviceInfo,
+            ExpiredDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenTTLDays),
+            CreatedDate = DateTime.UtcNow,
+            CreatedBy = user.Username, // or System
+            IsDeleted = false
+        };
+
+        await _refreshTokenRepository.CreateAsync(refreshTokenEntity, cancellationToken);
 
         var response = new AuthResponse(
-            AccessToken: token,
+            AccessToken: accessToken,
+            RefreshToken: refreshToken,
             ExpiresIn: expiresInSeconds,
             TokenType: "Bearer",
             User: new UserInfo(
-                Id: loginUser.UserId,
-                Email: loginUser.Email,
-                Roles: loginUser.Roles
+                Id: user.UserId,
+                Email: user.Email,
+                Roles: user.Roles
             )
         );
 

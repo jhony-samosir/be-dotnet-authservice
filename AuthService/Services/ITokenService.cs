@@ -6,4 +6,6 @@ public interface ITokenService
         int userId,
         string username,
         IEnumerable<string> roles);
+
+    string GenerateRefreshToken();
 }

@@ -19,7 +19,10 @@ namespace AuthService.Controllers
         [ApiResult(typeof(ApiResponse<AuthResponse>))]
         public async Task<IActionResult> Login([FromBody] AuthRequest request)
         {
-            var result = await _authService.Login(request);
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var deviceInfo = Request.Headers.UserAgent.ToString();
+            
+            var result = await _authService.Login(request, ipAddress, deviceInfo);
             return result.ToActionResult();
         }
 
@@ -29,6 +32,27 @@ namespace AuthService.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             var result = await _authService.Register(request);
+            return result.ToActionResult();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("refresh")]
+        [ApiResult(typeof(ApiResponse<AuthResponse>))]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var deviceInfo = Request.Headers.UserAgent.ToString();
+
+            var result = await _authService.RefreshToken(request.RefreshToken, ipAddress, deviceInfo);
+            return result.ToActionResult();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("revoke")]
+        [ApiResult(typeof(ApiResponse<bool>))]
+        public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenRequest request)
+        {
+            var result = await _authService.RevokeToken(request.RefreshToken);
             return result.ToActionResult();
         }
     }

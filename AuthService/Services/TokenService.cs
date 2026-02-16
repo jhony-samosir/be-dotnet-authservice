@@ -24,7 +24,7 @@ public class TokenService(IOptions<JwtSettings> jwtOptions) : ITokenService
             SecurityAlgorithms.HmacSha256);
 
         var now = DateTime.UtcNow;
-        var expires = now.AddMinutes(_jwt.AccessTokenMinutes);
+        var expires = now.AddSeconds(_jwt.AccessTokenSeconds);
 
         var claims = new List<Claim>
         {
@@ -55,5 +55,13 @@ public class TokenService(IOptions<JwtSettings> jwtOptions) : ITokenService
         var expiresInSeconds = (int)(expires - now).TotalSeconds;
 
         return (tokenString, expiresInSeconds);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }
