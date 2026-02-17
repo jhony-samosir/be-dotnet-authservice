@@ -3,10 +3,13 @@ using AuthService.Configuration;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
 using AuthService.Domain;
-using AuthService.Repositories;
+using AuthService.Repositories.AuthRefreshTokens;
+using AuthService.Repositories.AuthUsers;
+using AuthService.Services.Passwords;
+using AuthService.Services.Tokens;
 using Microsoft.Extensions.Options;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Auths;
 
 public class AuthService(
     IAuthUserRepository userRepository,

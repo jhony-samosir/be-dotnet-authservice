@@ -5,7 +5,7 @@ using AuthService.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Tokens;
 
 public class TokenService(IOptions<JwtSettings> jwtOptions) : ITokenService
 {

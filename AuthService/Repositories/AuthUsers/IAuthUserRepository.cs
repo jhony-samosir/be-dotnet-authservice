@@ -2,7 +2,7 @@ using AuthService.Common.Querying;
 using AuthService.Common.Results;
 using AuthService.Contracts.Projection;
 
-namespace AuthService.Repositories;
+namespace AuthService.Repositories.AuthUsers;
 
 /// <summary>
 /// Repository abstraction for querying authentication users and their roles.

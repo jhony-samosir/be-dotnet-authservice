@@ -1,6 +1,6 @@
 ﻿using AuthService.Configuration;
 using AuthService.Domain;
-using AuthService.Services;
+using AuthService.Services.Tokens;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,7 +17,7 @@ public class TokenServiceTests : TestBase
             Issuer = "test-issuer",
             Audience = "test-audience",
             SigningKey = "THIS_IS_A_TEST_SIGNING_KEY_123456789",
-            AccessTokenMinutes = 60
+            AccessTokenSeconds = 600
         };
 
         var options = Options.Create(settings);
@@ -43,7 +43,7 @@ public class TokenServiceTests : TestBase
         var service = CreateService();
         var user = CreateUser();
 
-        var (token, expires) = service.GenerateAccessToken(user, ["Admin"]);
+        var (token, expires) = service.GenerateAccessToken(user.AuthUserId, user.Username, ["Admin"]);
 
         token.Should().NotBeNullOrEmpty();
         expires.Should().BeGreaterThan(0);
@@ -58,7 +58,7 @@ public class TokenServiceTests : TestBase
         var service = CreateService();
         var user = CreateUser();
 
-        var (token, _) = service.GenerateAccessToken(user, ["Admin"]);
+        var (token, _) = service.GenerateAccessToken(user.AuthUserId, user.Username, ["Admin"]);
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(token);
@@ -77,7 +77,7 @@ public class TokenServiceTests : TestBase
         var service = CreateService();
         var user = CreateUser();
 
-        var (token, _) = service.GenerateAccessToken(user, []);
+        var (token, _) = service.GenerateAccessToken(user.AuthUserId, user.Username, []);
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(token);
@@ -95,7 +95,7 @@ public class TokenServiceTests : TestBase
         var service = CreateService();
         var user = CreateUser();
 
-        var (_, expires) = service.GenerateAccessToken(user, []);
+        var (_, expires) = service.GenerateAccessToken(user.AuthUserId ,user.Username, []);
 
         expires.Should().BeGreaterThan(0);
         expires.Should().BeLessThanOrEqualTo(3600);

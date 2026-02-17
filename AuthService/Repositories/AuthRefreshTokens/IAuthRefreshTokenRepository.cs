@@ -1,6 +1,6 @@
 using AuthService.Domain;
 
-namespace AuthService.Repositories;
+namespace AuthService.Repositories.AuthRefreshTokens;
 
 /// <summary>
 /// Repository abstraction for querying authentication refresh token.

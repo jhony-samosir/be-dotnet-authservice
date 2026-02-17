@@ -2,7 +2,7 @@
 using AuthService.Common.Results;
 using AuthService.Contracts.Projection;
 
-namespace AuthService.Repositories;
+namespace AuthService.Repositories.Roles;
 
 /// <summary>
 /// Repository abstraction for querying roles.

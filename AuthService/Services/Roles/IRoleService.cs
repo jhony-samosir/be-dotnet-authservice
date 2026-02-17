@@ -3,7 +3,7 @@ using AuthService.Common.Results;
 using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Roles;
 
 /// <summary>
 /// Application service for role list, update, and soft delete.

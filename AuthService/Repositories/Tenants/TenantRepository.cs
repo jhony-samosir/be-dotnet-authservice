@@ -7,7 +7,7 @@ using AuthService.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
-namespace AuthService.Repositories;
+namespace AuthService.Repositories.Tenants;
 
 public class TenantRepository(DataContext dataContext) : ITenantRepository
 {

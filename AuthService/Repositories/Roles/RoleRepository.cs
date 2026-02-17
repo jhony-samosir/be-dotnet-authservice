@@ -6,7 +6,7 @@ using AuthService.Domain;
 using AuthService.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthService.Repositories;
+namespace AuthService.Repositories.Roles;
 
 public class RoleRepository(DataContext dbContext) : IRoleRepository
 {

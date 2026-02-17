@@ -2,7 +2,7 @@
 using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
 using AuthService.Controllers;
-using AuthService.Services;
+using AuthService.Services.Roles;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;

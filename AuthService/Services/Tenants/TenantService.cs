@@ -1,9 +1,9 @@
 using AuthService.Common.Querying;
 using AuthService.Common.Results;
 using AuthService.Contracts.Projection;
-using AuthService.Repositories;
+using AuthService.Repositories.Tenants;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Tenants;
 
 public class TenantService(ITenantRepository tenantRepository) : ITenantService
 {

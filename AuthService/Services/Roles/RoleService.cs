@@ -2,9 +2,9 @@
 using AuthService.Common.Results;
 using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
-using AuthService.Repositories;
+using AuthService.Repositories.Roles;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Roles;
 
 /// <summary>
 /// Implements role list, update, and soft delete using the role repository. <see cref="IRoleService"/>.

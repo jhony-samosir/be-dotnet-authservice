@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Passwords;
 
 /// <summary>
 /// Implements password hash & verify. <see cref="IPasswordService"/>.

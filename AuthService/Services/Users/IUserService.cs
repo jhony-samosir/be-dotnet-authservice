@@ -3,7 +3,7 @@ using AuthService.Common.Results;
 using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Users;
 
 /// <summary>
 /// Application service for user list, update, and soft delete.

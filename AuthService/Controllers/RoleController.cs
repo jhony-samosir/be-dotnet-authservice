@@ -5,7 +5,7 @@ using AuthService.Contracts.DTOs;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
 using AuthService.Extensions;
-using AuthService.Services;
+using AuthService.Services.Roles;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

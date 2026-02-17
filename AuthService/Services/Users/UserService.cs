@@ -1,10 +1,10 @@
 using AuthService.Common.Querying;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.DTOs;
-using AuthService.Repositories;
 using AuthService.Common.Results;
+using AuthService.Repositories.AuthUsers;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Users;
 
 public class UserService(IAuthUserRepository userRepository) : IUserService
 {

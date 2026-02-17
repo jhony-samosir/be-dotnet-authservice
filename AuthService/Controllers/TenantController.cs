@@ -4,7 +4,7 @@ using AuthService.Common.Swagger;
 using AuthService.Contracts.Projection;
 using AuthService.Contracts.Response;
 using AuthService.Extensions;
-using AuthService.Services;
+using AuthService.Services.Tenants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,8 +1,8 @@
 ﻿using AuthService.Common;
 using AuthService.Contracts.Request;
 using AuthService.Domain;
-using AuthService.Repositories;
-using AuthService.Services;
+using AuthService.Repositories.AuthUsers;
+using AuthService.Services.Tokens;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Moq;
@@ -15,9 +15,9 @@ public class AuthServiceTests : TestBase
     private readonly Mock<ITokenService> _token = new();
     private readonly Mock<IPasswordHasher<AuthUser>> _hasher = new();
 
-    private AuthService.Services.AuthService CreateService()
+    private AuthService.Services.Auths.AuthService CreateService()
     {
-        AuthService.Services.AuthService authService = new(_repo.Object, _token.Object, _hasher.Object);
+        AuthService.Services.Auths.AuthService authService = new(_repo.Object, _token.Object, _hasher.Object);
         return authService;
     }
 

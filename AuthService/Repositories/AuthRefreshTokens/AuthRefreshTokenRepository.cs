@@ -3,7 +3,7 @@ using AuthService.Domain;
 using AuthService.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthService.Repositories;
+namespace AuthService.Repositories.AuthRefreshTokens;
 
 public class AuthRefreshTokenRepository(DataContext context) : IAuthRefreshTokenRepository
 {

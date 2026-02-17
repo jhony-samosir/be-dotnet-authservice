@@ -1,4 +1,4 @@
-﻿namespace AuthService.Services;
+﻿namespace AuthService.Services.Tokens;
 
 public interface ITokenService
 {

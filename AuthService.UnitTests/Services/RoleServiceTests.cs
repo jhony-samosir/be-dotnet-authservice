@@ -2,8 +2,8 @@
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
 using AuthService.Domain;
-using AuthService.Repositories;
-using AuthService.Services;
+using AuthService.Repositories.Roles;
+using AuthService.Services.Roles;
 using FluentAssertions;
 using Moq;
 

@@ -2,7 +2,7 @@ using AuthService.Common.Querying;
 using AuthService.Common.Results;
 using AuthService.Contracts.Projection;
 
-namespace AuthService.Services;
+namespace AuthService.Services.Tenants;
 
 /// <summary>
 /// Application service for tenant list, update, and soft delete.

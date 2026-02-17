@@ -3,7 +3,7 @@ using AuthService.Common.Results;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
 using AuthService.Controllers;
-using AuthService.Services;
+using AuthService.Services.Auths;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;

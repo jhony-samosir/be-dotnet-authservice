@@ -1,11 +1,11 @@
 ﻿using AuthService.Controllers;
 using AuthService.Contracts.Request;
-using AuthService.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using AuthService.Contracts.DTOs;
 using AuthService.Common.Results;
+using AuthService.Services.Users;
 
 namespace AuthService.UnitTests.Controllers;
 
