@@ -12,8 +12,6 @@ public sealed class AuditSaveChangesInterceptor(ICurrentUser currentUser) : Save
     private string CurrentUser =>
         !string.IsNullOrWhiteSpace(_currentUser.UserName)
             ? _currentUser.UserName
-            : !string.IsNullOrWhiteSpace(_currentUser.LoginName)
-                ? _currentUser.LoginName
                 : _currentUser.UserId != 0
                     ? _currentUser.UserId.ToString()
                     : "system";

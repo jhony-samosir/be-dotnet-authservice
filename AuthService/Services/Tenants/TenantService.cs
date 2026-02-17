@@ -17,7 +17,7 @@ public class TenantService(ITenantRepository tenantRepository) : ITenantService
 
         var tenant = await _tenantRepository.CreateAsync(name, ct);
         if (tenant == null)
-            return Result<TenantListProjection>.Failure(new Error(ErrorCode.Conflict, "Tenant code already exists"));
+            return Result<TenantListProjection>.Failure(new Error(ErrorCode.Conflict, "Tenant code already exists. Please try again!"));
 
         return Result<TenantListProjection>.Success(tenant);
     }

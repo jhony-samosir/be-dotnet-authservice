@@ -171,7 +171,7 @@ public class AuthService(
     {
         var (accessToken, expiresInSeconds) = _tokenService.GenerateAccessToken(
             user.UserId,
-            user.Username,
+            user.Email,
             user.Roles);
 
         var refreshToken = _tokenService.GenerateRefreshToken();
