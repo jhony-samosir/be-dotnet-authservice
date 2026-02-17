@@ -15,6 +15,10 @@ public partial class AuthUserRole
 
     public string CreatedBy { get; set; } = null!;
 
+    public DateTime? UpdatedDate { get; set; }
+
+    public string? UpdatedBy { get; set; }
+
     public bool IsDeleted { get; set; }
 
     public DateTime? DeletedDate { get; set; }

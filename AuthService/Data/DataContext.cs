@@ -5,19 +5,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthService.Data;
 
-public partial class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
+public partial class DataContext : DbContext
 {
+    public DataContext(DbContextOptions<DataContext> options)
+        : base(options)
+    {
+    }
+
     public virtual DbSet<AuthMenu> AuthMenu { get; set; }
 
     public virtual DbSet<AuthMenuPermission> AuthMenuPermission { get; set; }
 
     public virtual DbSet<AuthPermission> AuthPermission { get; set; }
 
-    public virtual DbSet<AuthRefreshToken> AuthRefreshToken { get; set; }
-
     public virtual DbSet<AuthRole> AuthRole { get; set; }
 
     public virtual DbSet<AuthRolePermission> AuthRolePermission { get; set; }
+
+    public virtual DbSet<AuthSession> AuthSession { get; set; }
 
     public virtual DbSet<AuthTenant> AuthTenant { get; set; }
 
@@ -114,8 +119,6 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
 
             entity.ToTable("auth_permission");
 
-            entity.HasIndex(e => e.Service, "idx_auth_permission_service").HasFilter("(is_deleted = false)");
-
             entity.HasIndex(e => e.Code, "uq_auth_permission_code")
                 .IsUnique()
                 .HasFilter("(is_deleted = false)");
@@ -150,52 +153,11 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
             entity.Property(e => e.UpdatedDate).HasColumnName("updated_date");
         });
 
-        modelBuilder.Entity<AuthRefreshToken>(entity =>
-        {
-            entity.HasKey(e => e.AuthRefreshTokenId).HasName("auth_refresh_token_pkey");
-
-            entity.ToTable("auth_refresh_token");
-
-            entity.HasIndex(e => e.ExpiredDate, "idx_refresh_token_cleanup").HasFilter("(revoked_date IS NULL)");
-
-            entity.HasIndex(e => new { e.Token, e.ExpiredDate, e.RevokedDate }, "idx_refresh_token_lookup").HasFilter("(is_deleted = false)");
-
-            entity.HasIndex(e => e.AuthUserId, "idx_refresh_token_user").HasFilter("(is_deleted = false)");
-
-            entity.HasIndex(e => e.Token, "uq_refresh_token_token")
-                .IsUnique()
-                .HasFilter("(is_deleted = false)");
-
-            entity.Property(e => e.AuthRefreshTokenId).HasColumnName("auth_refresh_token_id");
-            entity.Property(e => e.AuthUserId).HasColumnName("auth_user_id");
-            entity.Property(e => e.CreatedBy)
-                .HasMaxLength(50)
-                .HasDefaultValueSql("'system'::character varying")
-                .HasColumnName("created_by");
-            entity.Property(e => e.CreatedDate)
-                .HasDefaultValueSql("now()")
-                .HasColumnName("created_date");
-            entity.Property(e => e.DeletedBy)
-                .HasMaxLength(50)
-                .HasColumnName("deleted_by");
-            entity.Property(e => e.DeletedDate).HasColumnName("deleted_date");
-            entity.Property(e => e.DeviceInfo).HasColumnName("device_info");
-            entity.Property(e => e.ExpiredDate).HasColumnName("expired_date");
-            entity.Property(e => e.IpAddress).HasColumnName("ip_address");
-            entity.Property(e => e.IsDeleted)
-                .HasDefaultValue(false)
-                .HasColumnName("is_deleted");
-            entity.Property(e => e.RevokedDate).HasColumnName("revoked_date");
-            entity.Property(e => e.Token).HasColumnName("token");
-        });
-
         modelBuilder.Entity<AuthRole>(entity =>
         {
             entity.HasKey(e => e.AuthRoleId).HasName("auth_role_pkey");
 
             entity.ToTable("auth_role");
-
-            entity.HasIndex(e => e.IsDeleted, "idx_auth_role_softdelete");
 
             entity.HasIndex(e => e.Name, "uq_auth_role_name")
                 .IsUnique()
@@ -232,10 +194,6 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
 
             entity.ToTable("auth_role_permission");
 
-            entity.HasIndex(e => e.AuthPermissionId, "idx_auth_role_perm_perm").HasFilter("(is_deleted = false)");
-
-            entity.HasIndex(e => e.AuthRoleId, "idx_auth_role_perm_role").HasFilter("(is_deleted = false)");
-
             entity.HasIndex(e => new { e.AuthRoleId, e.AuthPermissionId }, "uq_auth_role_permission")
                 .IsUnique()
                 .HasFilter("(is_deleted = false)");
@@ -261,6 +219,65 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
                 .HasMaxLength(50)
                 .HasColumnName("updated_by");
             entity.Property(e => e.UpdatedDate).HasColumnName("updated_date");
+        });
+
+        modelBuilder.Entity<AuthSession>(entity =>
+        {
+            entity.HasKey(e => e.AuthSessionId).HasName("auth_session_pkey");
+
+            entity.ToTable("auth_session");
+
+            entity.HasIndex(e => new { e.AuthUserId, e.RevokedAt, e.ExpiresAt }, "idx_session_active").HasFilter("(is_deleted = false)");
+
+            entity.HasIndex(e => e.ExpiresAt, "idx_session_cleanup").HasFilter("((revoked_at IS NULL) AND (is_deleted = false))");
+
+            entity.HasIndex(e => e.RefreshTokenHash, "idx_session_token").HasFilter("(is_deleted = false)");
+
+            entity.HasIndex(e => e.AuthUserId, "idx_session_user").HasFilter("(is_deleted = false)");
+
+            entity.Property(e => e.AuthSessionId).HasColumnName("auth_session_id");
+            entity.Property(e => e.AuthTenantId).HasColumnName("auth_tenant_id");
+            entity.Property(e => e.AuthUserId).HasColumnName("auth_user_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy)
+                .HasMaxLength(50)
+                .HasDefaultValueSql("'system'::character varying")
+                .HasColumnName("created_by");
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_date");
+            entity.Property(e => e.DeletedBy)
+                .HasMaxLength(50)
+                .HasColumnName("deleted_by");
+            entity.Property(e => e.DeletedDate).HasColumnName("deleted_date");
+            entity.Property(e => e.DeviceId)
+                .HasMaxLength(200)
+                .HasColumnName("device_id");
+            entity.Property(e => e.DeviceName)
+                .HasMaxLength(200)
+                .HasColumnName("device_name");
+            entity.Property(e => e.ExpiresAt).HasColumnName("expires_at");
+            entity.Property(e => e.IpAddress).HasColumnName("ip_address");
+            entity.Property(e => e.IsCurrent)
+                .HasDefaultValue(true)
+                .HasColumnName("is_current");
+            entity.Property(e => e.IsDeleted)
+                .HasDefaultValue(false)
+                .HasColumnName("is_deleted");
+            entity.Property(e => e.LastUsedAt).HasColumnName("last_used_at");
+            entity.Property(e => e.RefreshTokenHash).HasColumnName("refresh_token_hash");
+            entity.Property(e => e.ReplacedByTokenHash).HasColumnName("replaced_by_token_hash");
+            entity.Property(e => e.RevokedAt).HasColumnName("revoked_at");
+            entity.Property(e => e.RevokedReason)
+                .HasMaxLength(100)
+                .HasColumnName("revoked_reason");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(50)
+                .HasColumnName("updated_by");
+            entity.Property(e => e.UpdatedDate).HasColumnName("updated_date");
+            entity.Property(e => e.UserAgent).HasColumnName("user_agent");
         });
 
         modelBuilder.Entity<AuthTenant>(entity =>
@@ -308,8 +325,6 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
 
             entity.HasIndex(e => new { e.Email, e.IsDeleted, e.IsActive, e.IsLocked }, "idx_auth_user_login");
 
-            entity.HasIndex(e => e.AuthTenantId, "idx_auth_user_tenant").HasFilter("(is_deleted = false)");
-
             entity.HasIndex(e => e.Email, "uq_auth_user_email")
                 .IsUnique()
                 .HasFilter("(is_deleted = false)");
@@ -319,9 +334,7 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
                 .HasFilter("(is_deleted = false)");
 
             entity.Property(e => e.AuthUserId).HasColumnName("auth_user_id");
-            entity.Property(e => e.AuthTenantId)
-                .HasDefaultValue(0)
-                .HasColumnName("auth_tenant_id");
+            entity.Property(e => e.AuthTenantId).HasColumnName("auth_tenant_id");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(50)
                 .HasDefaultValueSql("'system'::character varying")
@@ -362,10 +375,6 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
 
             entity.ToTable("auth_user_role");
 
-            entity.HasIndex(e => e.AuthRoleId, "idx_auth_user_role_role").HasFilter("(is_deleted = false)");
-
-            entity.HasIndex(e => e.AuthUserId, "idx_auth_user_role_user").HasFilter("(is_deleted = false)");
-
             entity.HasIndex(e => new { e.AuthUserId, e.AuthRoleId }, "uq_auth_user_role")
                 .IsUnique()
                 .HasFilter("(is_deleted = false)");
@@ -387,6 +396,10 @@ public partial class DataContext(DbContextOptions<DataContext> options) : DbCont
             entity.Property(e => e.IsDeleted)
                 .HasDefaultValue(false)
                 .HasColumnName("is_deleted");
+            entity.Property(e => e.UpdatedBy)
+                .HasMaxLength(50)
+                .HasColumnName("updated_by");
+            entity.Property(e => e.UpdatedDate).HasColumnName("updated_date");
         });
 
         OnModelCreatingPartial(modelBuilder);
