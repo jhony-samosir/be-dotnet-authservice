@@ -73,4 +73,11 @@ public class TokenService(IOptions<JwtSettings> jwtOptions) : ITokenService
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
     }
+
+    public string HashToken(string token)
+    {
+        var bytes = Encoding.UTF8.GetBytes(token);
+        var hash = System.Security.Cryptography.SHA256.HashData(bytes);
+        return Convert.ToBase64String(hash);
+    }
 }

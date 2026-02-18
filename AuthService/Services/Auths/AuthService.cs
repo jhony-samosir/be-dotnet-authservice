@@ -3,10 +3,12 @@ using AuthService.Configuration;
 using AuthService.Contracts.Request;
 using AuthService.Contracts.Response;
 using AuthService.Domain;
-using AuthService.Repositories.AuthRefreshTokens;
 using AuthService.Repositories.AuthUsers;
+using AuthService.Services.Cookies;
 using AuthService.Services.Passwords;
+using AuthService.Services.Sessions;
 using AuthService.Services.Tokens;
+using AuthService.Helpers;
 using Microsoft.Extensions.Options;
 
 namespace AuthService.Services.Auths;
@@ -15,13 +17,17 @@ public class AuthService(
     IAuthUserRepository userRepository,
     ITokenService tokenService,
     IPasswordService passwordService,
-    IAuthRefreshTokenRepository refreshTokenRepository,
+    ISessionService sessionService,
+    ICookieService cookieService,
+    ICurrentUser currentUser,
     IOptions<JwtSettings> jwtOptions) : IAuthService
 {
     private readonly IAuthUserRepository _userRepository = userRepository;
     private readonly ITokenService _tokenService = tokenService;
     private readonly IPasswordService _passwordService = passwordService;
-    private readonly IAuthRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
+    private readonly ISessionService _sessionService = sessionService;
+    private readonly ICookieService _cookieService = cookieService;
+    private readonly ICurrentUser _currentUser = currentUser;
     private readonly JwtSettings _jwtSettings = jwtOptions.Value;
 
     public async Task<Result<AuthResponse>> Login(
@@ -30,6 +36,7 @@ public class AuthService(
         string? deviceInfo = null,
         CancellationToken cancellationToken = default)
     {
+        // 1. Validate User
         var user = await _userRepository
             .GetByEmailWithRolesAsync(req.Email, cancellationToken);
 
@@ -51,7 +58,7 @@ public class AuthService(
                 new Error(ErrorCode.Forbidden, "User locked"));
         }
 
-        // ambil hash password dari repo
+        // 2. Validate Password
         var hash = await _userRepository.GetPasswordHashAsync(
             user.UserId,
             cancellationToken);
@@ -64,7 +71,44 @@ public class AuthService(
 
         await _userRepository.AuditLoginDateAsync(user.UserId, cancellationToken);
 
-        return await GenerateAuthResponseAsync(user, ipAddress, deviceInfo, cancellationToken);
+        // 3. Generate Tokens
+        var (accessToken, expiresInSeconds) = _tokenService.GenerateAccessToken(
+            user.UserId,
+            user.Email,
+            user.Roles);
+
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        // 4. Create Session (DB)
+        // We use user-agent from request if device info is not specific enough, but here we pass generic strings.
+        // The controller should pass specific User-Agent.
+        await _sessionService.CreateSessionAsync(
+            user.UserId,
+            user.AuthTenantId,
+            refreshToken,
+            ipAddress,
+            deviceInfo, // UserAgent
+            null, // DeviceId (could be tracked via headers if implemented)
+            null, // DeviceName
+            cancellationToken);
+
+        // 5. Set Cookie
+        _cookieService.SetRefreshTokenCookie(refreshToken);
+
+        // 6. Response (Access Token ONLY)
+        var response = new AuthResponse(
+            AccessToken: accessToken,
+            RefreshToken: string.Empty, // Empty string for JSON response
+            ExpiresIn: expiresInSeconds,
+            TokenType: "Bearer",
+            User: new UserInfo(
+                Id: user.UserId,
+                Email: user.Email,
+                Roles: user.Roles
+            )
+        );
+
+        return Result<AuthResponse>.Success(response);
     }
 
     public async Task<Result<AuthResponse>> Register(
@@ -96,103 +140,93 @@ public class AuthService(
                 new Error(ErrorCode.Unknown, "User creation failed"));
         }
 
-        // For register, we can also generate refresh token immediately
-        return await GenerateAuthResponseAsync(loginUser, null, null, cancellationToken);
+        // Auto-login after register
+        var (accessToken, expiresInSeconds) = _tokenService.GenerateAccessToken(
+             loginUser.UserId,
+             loginUser.Email,
+             loginUser.Roles);
+
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        await _sessionService.CreateSessionAsync(
+            loginUser.UserId,
+            loginUser.AuthTenantId,
+            refreshToken,
+            null, 
+            null,
+            null,
+            null,
+            cancellationToken);
+
+        _cookieService.SetRefreshTokenCookie(refreshToken);
+
+        var response = new AuthResponse(
+            AccessToken: accessToken,
+            RefreshToken: string.Empty,
+            ExpiresIn: expiresInSeconds,
+            TokenType: "Bearer",
+            User: new UserInfo(
+                Id: loginUser.UserId,
+                Email: loginUser.Email,
+                Roles: loginUser.Roles
+            )
+        );
+
+        return Result<AuthResponse>.Success(response);
     }
 
     public async Task<Result<AuthResponse>> RefreshToken(
-        string token,
+        string token, // Ignored, we use cookie
         string? ipAddress = null,
         string? deviceInfo = null,
         CancellationToken cancellationToken = default)
     {
-        var existingToken = await _refreshTokenRepository.GetByTokenAsync(token, cancellationToken);
-
-        if (existingToken is null)
+        // 1. Get Token from Cookie
+        var refreshToken = _cookieService.GetRefreshTokenFromCookie();
+        
+        if (string.IsNullOrEmpty(refreshToken))
         {
-            return Result<AuthResponse>.Failure(
-                new Error(ErrorCode.InvalidToken, "Invalid refresh token"));
+             return Result<AuthResponse>.Failure(new Error(ErrorCode.InvalidToken, "No refresh token provided"));
         }
 
-        if (existingToken.RevokedDate != null)
+        // 2. Validate & Rotate Session
+        var sessionResult = await _sessionService.ValidateAndRotateSessionAsync(
+            refreshToken,
+            ipAddress,
+            deviceInfo,
+            cancellationToken);
+
+        if (sessionResult.IsFailure)
         {
-            // Token revocation check - Security feature: Token Reuse Detection
-            // If a revoked token is used, it might mean it was stolen.
-            // We should revoke all refresh tokens for this user family to be safe.
-            await _refreshTokenRepository.RevokeAllByUserIdAsync(existingToken.AuthUserId, cancellationToken);
-            
-            return Result<AuthResponse>.Failure(
-                new Error(ErrorCode.InvalidToken, "Token has been revoked"));
+            // If reuse detected or invalid, we should clear the cookie
+            _cookieService.DeleteRefreshTokenCookie();
+            return Result<AuthResponse>.Failure(sessionResult.Error);
         }
 
-        if (existingToken.ExpiredDate < DateTime.UtcNow)
-        {
-            return Result<AuthResponse>.Failure(
-                new Error(ErrorCode.InvalidToken, "Token expired"));
-        }
+        var newSession = sessionResult.Value;
 
-        // Token Rotation: Revoke the used refresh token
-        await _refreshTokenRepository.RevokeAsync(existingToken.AuthRefreshTokenId, "Replaced by new token", cancellationToken);
+        // 3. Set New Cookie
+        // Use the raw token stashed in RefreshTokenHash
+        var newRefreshToken = newSession?.RefreshTokenHash
+            ?? throw new InvalidOperationException("Refresh token missing");
 
-        var user = await _userRepository.GetByIdWithRolesAsync(existingToken.AuthUserId, cancellationToken);
+        _cookieService.SetRefreshTokenCookie(newRefreshToken);
+
+        // 4. Generate New Access Token
+        var user = await _userRepository.GetByIdWithRolesAsync(newSession.AuthUserId, cancellationToken);
         if (user is null)
         {
-             return Result<AuthResponse>.Failure(
-                new Error(ErrorCode.NotFound, "User not found"));
+             return Result<AuthResponse>.Failure(new Error(ErrorCode.NotFound, "User not found"));
         }
 
-        return await GenerateAuthResponseAsync(user, ipAddress, deviceInfo, cancellationToken);
-    }
-
-    public async Task<Result<bool>> RevokeToken(string token, CancellationToken cancellationToken = default)
-    {
-        var existingToken = await _refreshTokenRepository.GetByTokenAsync(token, cancellationToken);
-
-        if (existingToken is null)
-        {
-             return Result<bool>.Failure(
-                new Error(ErrorCode.NotFound, "Token not found"));
-        }
-        
-        // Ensure we are not double revoking if already revoked, although RevokeAsync handles idempotent logic usually.
-        if (existingToken.RevokedDate == null) 
-        {
-             await _refreshTokenRepository.RevokeAsync(existingToken.AuthRefreshTokenId, "Manual revocation", cancellationToken);
-        }
-
-        return Result<bool>.Success(true);
-    }
-
-    private async Task<Result<AuthResponse>> GenerateAuthResponseAsync(
-        Contracts.Projection.UserWithRolesProjection user, 
-        string? ipAddress, 
-        string? deviceInfo, 
-        CancellationToken cancellationToken)
-    {
         var (accessToken, expiresInSeconds) = _tokenService.GenerateAccessToken(
             user.UserId,
             user.Email,
             user.Roles);
 
-        var refreshToken = _tokenService.GenerateRefreshToken();
-
-        var refreshTokenEntity = new AuthRefreshToken
-        {
-            AuthUserId = user.UserId,
-            Token = refreshToken,
-            IpAddress = ipAddress,
-            DeviceInfo = deviceInfo,
-            ExpiredDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenTTLDays),
-            CreatedDate = DateTime.UtcNow,
-            CreatedBy = user.Username, // or System
-            IsDeleted = false
-        };
-
-        await _refreshTokenRepository.CreateAsync(refreshTokenEntity, cancellationToken);
-
         var response = new AuthResponse(
             AccessToken: accessToken,
-            RefreshToken: refreshToken,
+            RefreshToken: string.Empty,
             ExpiresIn: expiresInSeconds,
             TokenType: "Bearer",
             User: new UserInfo(
@@ -203,5 +237,24 @@ public class AuthService(
         );
 
         return Result<AuthResponse>.Success(response);
+    }
+
+    public async Task<Result<bool>> RevokeToken(string token, CancellationToken cancellationToken = default)
+    {
+        // This method usage depends on context. If "Logout" from specific device:
+        // We expect the token to be in the cookie.
+        
+        var refreshToken = _cookieService.GetRefreshTokenFromCookie();
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            // Fallback: if caller passed a token explicitly (e.g. admin revoking someone else?)
+            // But for now let's assume standard logout flow.
+            return Result<bool>.Success(true);
+        }
+
+        await _sessionService.RevokeSessionAsync(refreshToken, "Logout", cancellationToken);
+        _cookieService.DeleteRefreshTokenCookie();
+
+        return Result<bool>.Success(true);
     }
 }

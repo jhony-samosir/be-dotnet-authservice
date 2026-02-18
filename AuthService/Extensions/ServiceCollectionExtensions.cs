@@ -3,16 +3,17 @@ using AuthService.Configuration;
 using AuthService.Data;
 using AuthService.Domain;
 using AuthService.Helpers;
-using AuthService.Repositories.AuthRefreshTokens;
 using AuthService.Repositories.AuthUsers;
 using AuthService.Repositories.Roles;
 using AuthService.Repositories.Tenants;
 using AuthService.Services.Auths;
+using AuthService.Services.Cookies; // Added
 using AuthService.Services.Passwords;
 using AuthService.Services.Roles;
+using AuthService.Services.Sessions; // Added
 using AuthService.Services.Tenants;
 using AuthService.Services.Tokens;
-using AuthService.Services.Users;
+using AuthService.Services.Users; // Added/Ensured
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +107,9 @@ public static class ServiceCollectionExtensions
 
     private static void AddApplicationServices(IServiceCollection services)
     {
+        services.AddScoped<ICookieService, CookieService>(); 
+        services.AddScoped<ISessionService, SessionService>(); 
+
         services.AddScoped<IAuthUserRepository, AuthUserRepository>();
         services.AddScoped<IAuthService, Services.Auths.AuthService>();
         services.AddScoped<IUserService, UserService>();
@@ -115,7 +119,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IPasswordService, PasswordService>();
-        services.AddScoped<IAuthRefreshTokenRepository, AuthRefreshTokenRepository>();
         services.AddScoped<ITenantRepository, TenantRepository>();
         services.AddScoped<ITenantService, TenantService>();
     }

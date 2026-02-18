@@ -3,6 +3,7 @@
 public sealed class UserWithRolesProjection
 {
     public int UserId { get; init; }
+    public int AuthTenantId { get; init; }
     public string Username { get; init; } = "";
     public string Email { get; init; } = "";
     public bool IsActive { get; init; }

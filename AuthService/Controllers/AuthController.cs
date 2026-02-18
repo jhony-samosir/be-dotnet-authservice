@@ -13,16 +13,17 @@ namespace AuthService.Controllers
     public class AuthController(IAuthService authService) : ControllerBase
     {
         private readonly IAuthService _authService = authService;
+        
+        // Helper to get IP and UserAgent
+        private string? IpAddress => HttpContext.Connection.RemoteIpAddress?.ToString();
+        private string? UserAgent => Request.Headers.UserAgent.ToString();
 
         [AllowAnonymous]
         [HttpPost("login")]
         [ApiResult(typeof(ApiResponse<AuthResponse>))]
         public async Task<IActionResult> Login([FromBody] AuthRequest request)
         {
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            var deviceInfo = Request.Headers.UserAgent.ToString();
-            
-            var result = await _authService.Login(request, ipAddress, deviceInfo);
+            var result = await _authService.Login(request, IpAddress, UserAgent);
             return result.ToActionResult();
         }
 
@@ -38,23 +39,19 @@ namespace AuthService.Controllers
         [AllowAnonymous]
         [HttpPost("refresh")]
         [ApiResult(typeof(ApiResponse<AuthResponse>))]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        public async Task<IActionResult> RefreshToken()
         {
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            var deviceInfo = Request.Headers.UserAgent.ToString();
-
-            var result = await _authService.RefreshToken(request.RefreshToken, ipAddress, deviceInfo);
+            // Token is read from Cookie inside service
+            var result = await _authService.RefreshToken(string.Empty, IpAddress, UserAgent);
             return result.ToActionResult();
         }
 
-        [AllowAnonymous]
-        [HttpPost("revoke")]
+        [HttpPost("logout")]
         [ApiResult(typeof(ApiResponse<bool>))]
-        public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenRequest request)
+        public async Task<IActionResult> Logout()
         {
-            var result = await _authService.RevokeToken(request.RefreshToken);
+            var result = await _authService.RevokeToken(string.Empty);
             return result.ToActionResult();
         }
     }
-
 }

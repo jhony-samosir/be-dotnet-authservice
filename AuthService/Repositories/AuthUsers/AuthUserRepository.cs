@@ -23,6 +23,7 @@ public class AuthUserRepository(DataContext dbContext) : IAuthUserRepository
             select new UserWithRolesProjection
             {
                 UserId = u.AuthUserId,
+                AuthTenantId = u.AuthTenantId,
                 Username = u.Username,
                 Email = u.Email,
                 IsActive = u.IsActive,
@@ -161,6 +162,7 @@ public class AuthUserRepository(DataContext dbContext) : IAuthUserRepository
             select new UserWithRolesProjection
             {
                 UserId = u.AuthUserId,
+                AuthTenantId = u.AuthTenantId,
                 Username = u.Username,
                 Email = u.Email,
                 IsActive = u.IsActive,

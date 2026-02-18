@@ -8,4 +8,6 @@ public interface ITokenService
         IEnumerable<string> roles);
 
     string GenerateRefreshToken();
+
+    string HashToken(string token);
 }
